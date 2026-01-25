@@ -15,7 +15,7 @@
 
 ### 环境要求
 
-- Node.js 16+
+- Node.js 20.19.0+ 或 22.12.0+
 - npm 或 pnpm
 
 ### 安装依赖
@@ -30,10 +30,22 @@ npm install
 npm run dev
 ```
 
+### 类型检查
+
+```sh
+npm run type-check
+```
+
 ### 生产构建
 
 ```sh
 npm run build
+```
+
+### 预览构建
+
+```sh
+npm run preview
 ```
 
 ## 📦 支持的设备类型
@@ -73,12 +85,14 @@ npm run build
 
 ## 🛠️ 技术栈
 
-- **框架**: Vue 3 (Composition API)
-- **语言**: TypeScript
-- **状态管理**: Pinia
-- **路由**: Vue Router
-- **UI组件**: Element Plus
-- **构建工具**: Vite
+- **框架**: Vue 3.5+ (Composition API)
+- **语言**: TypeScript 5.9
+- **状态管理**: Pinia 3.0+
+- **路由**: Vue Router 4.6+
+- **UI组件**: Element Plus 2.13+
+- **图表**: ECharts 6.0+ / Vue-ECharts 8.0+
+- **构建工具**: Vite 7.2+
+- **开发工具**: Vue DevTools
 
 ## 📁 项目结构
 

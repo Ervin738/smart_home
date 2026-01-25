@@ -5,7 +5,7 @@
 -->
 <script setup lang="ts">
 import { ref, computed, nextTick, watch, onMounted } from 'vue'
-import { useTabsStore } from '@/features/layout/components/tabs'
+import { useTabsStore } from '@/features/layout/tabs'
 
 const tabsStore = useTabsStore()
 const showAddDialog = ref(false)
@@ -248,18 +248,48 @@ const addTab = () => {
   bottom: 8px;
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.22) 0%,
-    rgba(255, 255, 255, 0.15) 100%
+    rgba(58, 90, 122, 0.6) 0%,
+    rgba(42, 58, 90, 0.5) 100%
   );
   border-radius: 18px;
   transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
   pointer-events: none;
   z-index: 0;
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(58, 106, 154, 0.15),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.liquid-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(58, 106, 154, 0.08) 100%
+  );
+  border-radius: 18px;
+  pointer-events: none;
+}
+
+.liquid-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 60%
+  );
+  border-radius: 18px;
+  pointer-events: none;
 }
 
 .empty-hint {

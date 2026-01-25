@@ -5,7 +5,7 @@
 -->
 <script setup lang="ts">
 import { ref, watch } from 'vue'
-import type { Device } from '@/features/device/stores/devices'
+import type { Device } from '@/features/device/devices.store'
 
 const props = defineProps<{
   device: Device | null

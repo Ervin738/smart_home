@@ -6,16 +6,16 @@
 -->
 <script setup lang="ts">
 import { ref, computed, watch, toRef } from 'vue'
-import type { Device } from '@/features/device/stores/devices'
+import type { Device } from '@/features/device/devices.store'
 import { INTERACTION_TIMING } from '@/constants'
-import { useDeviceState, useRobotControl, useClothesRackControl } from '@/features/device/composables'
-import { useVerticalSlider } from '@/features/device/composables'
+import { useDeviceState, useRobotControl, useClothesRackControl } from '@/shared/composables'
+import { useVerticalSlider } from '@/shared/composables'
 import { 
   isWashingMachine as checkIsWashingMachine, 
   isRobotVacuum as checkIsRobotVacuum, 
   isClothesRack as checkIsClothesRack,
   getCleanerTypeLabel 
-} from '@/features/device/utils'
+} from '@/features/device/deviceHelpers'
 
 const props = defineProps<{
   visible: boolean

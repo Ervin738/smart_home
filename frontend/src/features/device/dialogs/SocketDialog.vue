@@ -4,7 +4,7 @@
   触发：长按插座/插排设备卡片
 -->
 <script setup lang="ts">
-import type { Device } from '@/features/device/stores/devices'
+import type { Device } from '@/features/device/devices.store'
 
 const props = defineProps<{
   visible: boolean

@@ -3,7 +3,7 @@
  * 功能：提供设备控制的通用逻辑，如模式选择、控制按钮状态等
  */
 import { ref, computed, type Ref } from 'vue'
-import type { Device } from '../stores/devices'
+import type { Device } from './devices.store'
 
 /**
  * 设备模式和控制状态管理

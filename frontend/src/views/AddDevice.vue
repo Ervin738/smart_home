@@ -5,8 +5,8 @@
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDevicesStore } from '@/features/device/stores'
-import { useTabsStore } from '@/features/layout/components/tabs'
+import { useDevicesStore } from '@/features/device/devices.store'
+import { useTabsStore } from '@/features/layout/tabs'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useNameOverflow } from '@/shared/composables'

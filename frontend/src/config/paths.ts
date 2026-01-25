@@ -26,4 +26,3 @@ export const CONSTANTS = '@/constants'
 // 其他
 export const VIEWS = '@/views'
 export const ROUTER = '@/router'
-export const STYLES = '@/styles'

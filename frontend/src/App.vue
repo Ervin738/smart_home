@@ -9,7 +9,7 @@ import Clock from '@/shared/components/Clock.vue'
 import Weather from '@/shared/components/Weather.vue'
 import ModeBadge from '@/shared/components/Switchmode.vue'
 import BrightnessControl from '@/shared/components/BrightnessControl.vue'
-import { useDevicesStore, type Device } from '@/features/device/stores'
+import { useDevicesStore, type Device } from '@/features/device/devices.store'
 
 const devicesStore = useDevicesStore()
 const route = useRoute()
