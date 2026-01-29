@@ -109,43 +109,15 @@ onUnmounted(() => {
   backdrop-filter: blur(30px) saturate(120%);
   -webkit-backdrop-filter: blur(30px) saturate(120%);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 26px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 
     0 8px 32px rgba(0, 0, 0, 0.4),
     0 2px 8px rgba(10, 14, 26, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 26px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
-}
-
-.mode-container::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.03) 0%,
-    transparent 35%,
-    transparent 65%,
-    rgba(58, 106, 154, 0.04) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.mode-container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    ellipse 80% 50% at 50% 0%,
-    rgba(255, 255, 255, 0.03) 0%,
-    transparent 60%
-  );
-  pointer-events: none;
-  z-index: 0;
 }
 
 .mode-container.expanded {
@@ -164,6 +136,7 @@ onUnmounted(() => {
   position: relative;
   z-index: 1;
   border-radius: 26px;
+  background: transparent;
 }
 
 .mode-button:hover { 
@@ -182,7 +155,7 @@ onUnmounted(() => {
 .mode-options {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid rgba(255, 255, 255, 0.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   animation: optionsSlide 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
   z-index: 1;

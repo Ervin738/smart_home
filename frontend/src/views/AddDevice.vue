@@ -5,7 +5,7 @@
 -->
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useDevicesStore } from '@/features/device/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 import { useTabsStore } from '@/features/layout/tabs'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -108,7 +108,9 @@ const addDevice = () => {
   devicesStore.addDevice({
     id: Date.now().toString(),
     ...formData.value,
-    status: 'online'
+    status: 'offline',
+    // 为电暖器设置默认目标温度
+    ...(formData.value.type === 'environment' && formData.value.environmentType === 'heater' ? { targetTemp: 25 } : {})
   })
   formData.value = { name: '', type: '', lightType: '', switchType: '', cleanerType: '', securityType: '', environmentType: '', personalType: '', bathroomType: '', kitchenType: '', networkType: '', entertainmentType: '', otherType: '', location: '' }
   showForm.value = false
@@ -381,7 +383,7 @@ const getOtherTypeLabel = (otherType: string) => getLabelByValue(otherTypes, oth
 
     <transition-group name="list" tag="div" class="devices-grid">
       <div v-for="device in devicesStore.devices" :key="device.id" class="device-card">
-        <div class="device-name" :ref="(el) => checkNameOverflow(el as HTMLElement, device.id)">
+        <div class="device-name" :ref="(el) => el && checkNameOverflow(el as HTMLElement, device.id)">
           <span class="name-text" :class="{ overflow: isNameOverflow(device.id) }">{{ device.name }}</span>
         </div>
         <div class="device-meta">

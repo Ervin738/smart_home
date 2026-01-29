@@ -3,61 +3,13 @@
   功能：应用主框架，包含顶部信息栏（时钟、天气、模式切换）、路由视图、底部亮度控制
 -->
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Clock from '@/shared/components/Clock.vue'
 import Weather from '@/shared/components/Weather.vue'
 import ModeBadge from '@/shared/components/Switchmode.vue'
-import BrightnessControl from '@/shared/components/BrightnessControl.vue'
-import { useDevicesStore, type Device } from '@/features/device/devices.store'
 
-const devicesStore = useDevicesStore()
 const route = useRoute()
-const selectedLightDevice = ref<Device | null>(null)
-const brightnessRef = ref<HTMLElement | null>(null)
-
-// 路由变化时自动关闭亮度控制
-watch(() => route.path, () => {
-  selectedLightDevice.value = null
-})
-
-const onSelectLight = (device: Device | null) => {
-  selectedLightDevice.value = device
-}
-
-const onUpdateBrightness = (value: number) => {
-  if (selectedLightDevice.value) {
-    devicesStore.setBrightness(selectedLightDevice.value.id, value)
-  }
-}
-
-const onTogglePower = () => {
-  if (selectedLightDevice.value) {
-    devicesStore.toggleStatus(selectedLightDevice.value.id)
-  }
-}
-
-const closeControl = () => {
-  selectedLightDevice.value = null
-}
-
-// 点击外部关闭亮度控制
-const handleClickOutside = (e: MouseEvent) => {
-  if (!selectedLightDevice.value) return
-  const target = e.target as HTMLElement
-  // 如果点击的是亮度控制区域或设备卡片，不关闭
-  if (brightnessRef.value?.contains(target)) return
-  if (target.closest('.glass-card') || target.closest('.device-card')) return
-  closeControl()
-}
-
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-})
-
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
 </script>
 
 <template>
@@ -75,17 +27,7 @@ onUnmounted(() => {
 
     <!-- 中间：卡片区域（路由切换） -->
     <div class="middle-section">
-      <router-view @select-light="onSelectLight" />
-    </div>
-
-    <!-- 底部：亮度控制 -->
-    <div ref="brightnessRef" class="bottom-section" :class="{ expanded: selectedLightDevice }">
-      <BrightnessControl 
-        :device="selectedLightDevice"
-        @update:brightness="onUpdateBrightness"
-        @toggle-power="onTogglePower"
-        @close="closeControl"
-      />
+      <router-view />
     </div>
   </div>
 </template>
@@ -131,14 +73,6 @@ onUnmounted(() => {
 .middle-section {
   scrollbar-width: none;
   -ms-overflow-style: none;
-}
-
-.bottom-section {
-  flex-shrink: 0;
-}
-
-.bottom-section.expanded {
-  min-height: 150px;
 }
 
 @media (max-width: 600px) {

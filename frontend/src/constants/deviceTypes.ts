@@ -62,6 +62,8 @@ export const NETWORK_TYPE_LABELS: Record<string, string> = {
  * @returns 设备类型的中文显示名称
  */
 export function getDeviceDisplayType(device: any): string {
+  if (!device) return ''
+  
   if (device.lightType && LIGHT_TYPE_LABELS[device.lightType]) {
     return LIGHT_TYPE_LABELS[device.lightType] || ''
   }
@@ -77,5 +79,5 @@ export function getDeviceDisplayType(device: any): string {
   if (device.environmentType && ENVIRONMENT_TYPE_LABELS[device.environmentType]) {
     return ENVIRONMENT_TYPE_LABELS[device.environmentType] || ''
   }
-  return TYPE_LABELS[device.type] || device.type
+  return TYPE_LABELS[device.type] || device.type || ''
 }

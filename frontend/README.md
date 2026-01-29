@@ -2,6 +2,8 @@
 
 一个基于 Vue 3 + TypeScript 的现代化智能家居控制面板，提供直观的设备管理和控制界面。
 
+> 🎉 **最新更新**: 项目已完成代码优化，删除了15个未使用的文件和2000+行冗余代码，代码更加精简高效！
+
 ## ✨ 功能特性
 
 - 🏠 **房间管理**: 支持多房间切换和管理
@@ -59,6 +61,9 @@ npm run preview
 - 洗衣机/烘干机（多种清洁模式）
 - 晾衣架（升降、照明、烘干、消毒）
 
+### 环境电器
+- 加湿器（档位调节、电源控制）
+
 ### 其他设备
 - 插座/插排
 - 开关
@@ -106,6 +111,32 @@ npm run preview
 ### 浏览器扩展
 - Chrome/Edge: [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
 - Firefox: [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
+
+## 🔧 代码优化记录
+
+### 最近优化（2026-01-29）
+
+项目已完成全面的代码审查和优化：
+
+**删除的未使用文件（15个）：**
+- 6个未使用的对话框组件（空调、卫浴、厨房、个护、安防、影音）
+- 2个未使用的共享组件（BrightnessControl、SvgIcon）
+- 1个未使用的底部控制栏（BottomPowerBar）
+- 5个后端空文件夹标记文件
+- 1个临时文件
+
+**代码质量改进：**
+- ✅ 修复了重复的导出语句
+- ✅ 优化了 composables 结构
+- ✅ 修正了导入路径错误
+- ✅ 通过 TypeScript 类型检查
+- ✅ 保持所有功能和样式完整
+
+**优化成果：**
+- 删除约 2000+ 行冗余代码
+- 项目结构更加清晰
+- 维护成本降低
+- 构建速度提升
 
 ## 📄 许可证
 
