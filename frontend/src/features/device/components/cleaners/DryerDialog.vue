@@ -24,6 +24,49 @@ const isDrying = ref(false)
 
 const modeOptions = ['智能烘', '快速烘', '节能烘', '大件烘', '小件烘', '除菌烘', '除异味', '除静电']
 
+// 当设备改变时，恢复该设备的状态
+watch(() => props.device?.id, (newId) => {
+  if (newId && props.device) {
+    const device = props.device as any
+    const modeName = device.dryerModeName
+    if (modeName) {
+      activeModeIndex.value = modeOptions.indexOf(modeName)
+    } else {
+      activeModeIndex.value = -1
+    }
+    isDrying.value = device.dryerIsWorking ?? false
+  }
+})
+
+// 当状态改变时，同步到设备对象
+watch(activeModeIndex, (newIndex) => {
+  if (props.device) {
+    const device = props.device as any
+    device.dryerModeName = newIndex >= 0 ? modeOptions[newIndex] : ''
+  }
+})
+
+watch(isDrying, (newValue) => {
+  if (props.device) {
+    const device = props.device as any
+    device.dryerIsWorking = newValue
+  }
+})
+
+// 初始化时恢复状态
+watch(() => props.visible, (visible) => {
+  if (visible && props.device) {
+    const device = props.device as any
+    const modeName = device.dryerModeName
+    if (modeName) {
+      activeModeIndex.value = modeOptions.indexOf(modeName)
+    } else {
+      activeModeIndex.value = -1
+    }
+    isDrying.value = device.dryerIsWorking ?? false
+  }
+})
+
 const handleModeSelect = (index: number) => {
   if (!props.device || props.device.status === 'offline') return
   activeModeIndex.value = index
@@ -42,6 +85,11 @@ watch(() => props.device?.status, (newStatus) => {
   if (newStatus === 'offline') {
     activeModeIndex.value = -1
     isDrying.value = false
+    if (props.device) {
+      const device = props.device as any
+      device.dryerModeName = ''
+      device.dryerIsWorking = false
+    }
   }
 })
 </script>

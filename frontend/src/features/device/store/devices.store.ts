@@ -28,6 +28,14 @@ export interface Device {
   targetTemp?: number // 目标温度 16-32°C (电暖器)
   acModeIndex?: number | null // 空调模式索引 0-2 (制冷、制热、除湿)
   humidifierLevel?: number // 加湿器档位 1-3 (1档、2档、恒湿)
+  // 风扇
+  fanModeIndex?: number // 风扇模式索引 0-1 (直吹风、自然风)
+  speedLevel?: number // 风速等级 1-4
+  swingEnabled?: boolean // 扫风开关
+  swingAngle?: number // 扫风角度 30-140°
+  // 除湿机
+  dehumidifierModeIndex?: number // 除湿机模式索引 0-2 (智能、睡眠、干衣)
+  targetHumidity?: number // 目标湿度 40-70%
   // 扫地机器人
   robotModeIndex?: number // 清洁模式索引 0-3 (扫地、拖地、边扫边拖、先扫后拖)
   robotIsCleaning?: boolean // 是否正在清扫
@@ -126,7 +134,7 @@ export const useDevicesStore = defineStore('devices', () => {
 
   const setDelayShutdown = (id: string, enabled: boolean, durationMinutes?: number) => {
     const device = devices.value.find(d => d.id === id)
-    if (device && device.type === 'environment' && device.environmentType === 'heater') {
+    if (device && device.type === 'environment' && (device.environmentType === 'heater' || device.environmentType === 'fan' || device.environmentType === 'dehumidifier')) {
       device.delayShutdownEnabled = enabled
       if (enabled && durationMinutes) {
         device.delayShutdownDuration = durationMinutes
@@ -135,6 +143,48 @@ export const useDevicesStore = defineStore('devices', () => {
         device.delayShutdownDuration = undefined
         device.delayShutdownEndTime = undefined
       }
+    }
+  }
+
+  const setFanMode = (id: string, modeIndex: number) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device && device.type === 'environment' && device.environmentType === 'fan') {
+      device.fanModeIndex = Math.max(0, Math.min(1, modeIndex))
+    }
+  }
+
+  const setSpeedLevel = (id: string, level: number) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device && device.type === 'environment' && device.environmentType === 'fan') {
+      device.speedLevel = Math.max(1, Math.min(4, level))
+    }
+  }
+
+  const setSwingEnabled = (id: string, enabled: boolean) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device && device.type === 'environment' && device.environmentType === 'fan') {
+      device.swingEnabled = enabled
+    }
+  }
+
+  const setSwingAngle = (id: string, angle: number) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device && device.type === 'environment' && device.environmentType === 'fan') {
+      device.swingAngle = Math.max(30, Math.min(140, angle))
+    }
+  }
+
+  const setDehumidifierMode = (id: string, modeIndex: number) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device && device.type === 'environment' && device.environmentType === 'dehumidifier') {
+      device.dehumidifierModeIndex = Math.max(0, Math.min(2, modeIndex))
+    }
+  }
+
+  const setTargetHumidity = (id: string, humidity: number) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device && device.type === 'environment' && device.environmentType === 'dehumidifier') {
+      device.targetHumidity = Math.max(40, Math.min(70, humidity))
     }
   }
 
@@ -323,6 +373,25 @@ export const useDevicesStore = defineStore('devices', () => {
     }
   }
 
+  // 执行延时关闭
+  const executeDelayShutdown = (id: string) => {
+    const device = devices.value.find(d => d.id === id)
+    if (device?.delayShutdownEnabled) {
+      const previousStatus = device.status
+      device.status = 'offline'
+      
+      // 触发回调通知
+      if (timerExecuteCallback && previousStatus !== device.status) {
+        timerExecuteCallback(device, 'off')
+      }
+      
+      // 延时关闭执行后清除
+      device.delayShutdownEnabled = false
+      device.delayShutdownDuration = undefined
+      device.delayShutdownEndTime = undefined
+    }
+  }
+
   const stopTimerCheck = () => {
     if (timerInterval) {
       clearInterval(timerInterval)
@@ -344,6 +413,12 @@ export const useDevicesStore = defineStore('devices', () => {
     setHumidifierLevel,
     setAcMode,
     setDelayShutdown,
+    setFanMode,
+    setSpeedLevel,
+    setSwingEnabled,
+    setSwingAngle,
+    setDehumidifierMode,
+    setTargetHumidity,
     setRobotMode,
     setRobotCleaning,
     setTimer,

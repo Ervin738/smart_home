@@ -121,10 +121,10 @@ const getTempGradient = (temp: number) => {
 const toggleDelayShutdown = () => {
   // 只有在设备开启状态时才能启用延时关闭
   if (props.device?.status !== 'online' && !delayShutdownEnabled.value) {
+    delayShutdownEnabled.value = false
     return
   }
   
-  delayShutdownEnabled.value = !delayShutdownEnabled.value
   if (props.device) {
     devicesStore.setDelayShutdown(
       props.device.id,
@@ -215,13 +215,19 @@ const selectDelayTime = (index: number) => {
                 </svg>
               </div>
               <span class="delay-label">延时关闭</span>
-              <div class="delay-toggle" :class="{ active: delayShutdownEnabled }" @click="toggleDelayShutdown">
-                <div class="toggle-thumb"></div>
-              </div>
+              <label class="swing-toggle">
+                <input 
+                  type="checkbox" 
+                  v-model="delayShutdownEnabled"
+                  :disabled="device.status === 'offline'"
+                  @change="toggleDelayShutdown"
+                />
+                <span class="toggle-slider"></span>
+              </label>
             </div>
             
             <div v-if="delayShutdownEnabled" class="delay-time-display" @click="openDelayTimePicker">
-              <span class="delay-time-label">延时关闭时间</span>
+              <span class="delay-time-label">延迟时间</span>
               <span class="delay-time-value">{{ delayTime }}</span>
             </div>
           </div>
@@ -231,25 +237,22 @@ const selectDelayTime = (index: number) => {
   </transition>
 
   <!-- 延时关闭时间选择器弹窗 -->
-  <transition name="picker">
-    <div v-if="showDelayTimePicker" class="time-picker-overlay" @click="showDelayTimePicker = false">
-      <div class="time-picker-content" @click.stop>
+  <transition name="dialog">
+    <div v-if="showDelayTimePicker" class="dialog-overlay" @click="showDelayTimePicker = false">
+      <div class="time-picker-dialog" @click.stop>
         <div class="time-picker-header">
-          <span class="time-picker-title">选择延时关闭时间</span>
+          <span>选择延时关闭时间</span>
         </div>
         <div class="time-picker-options">
-          <div 
-            v-for="(option, index) in delayTimeOptions" 
+          <button
+            v-for="(option, index) in delayTimeOptions"
             :key="index"
             class="time-option"
             :class="{ active: index === delayTimeIndex }"
             @click="selectDelayTime(index)"
           >
-            <span class="option-text">{{ option }}</span>
-            <svg v-if="index === delayTimeIndex" class="check-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
+            {{ option }}
+          </button>
         </div>
       </div>
     </div>
@@ -491,17 +494,18 @@ const selectDelayTime = (index: number) => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, #ff9a3c 0%, #ff7a1f 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(255, 154, 60, 0.3);
 }
 
 .delay-icon {
-  width: 24px;
-  height: 24px;
-  color: rgba(255, 255, 255, 0.9);
+  width: 28px;
+  height: 28px;
+  color: white;
 }
 
 .delay-label {
@@ -511,35 +515,60 @@ const selectDelayTime = (index: number) => {
   flex: 1;
 }
 
-.delay-toggle {
-  width: 48px;
-  height: 28px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.2);
+/* Toggle 开关样式 */
+.swing-toggle {
   position: relative;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  display: inline-block;
+  width: 56px;
+  height: 32px;
   flex-shrink: 0;
 }
 
-.delay-toggle.active {
-  background: linear-gradient(135deg, #ff9a3c 0%, #ff7a1f 100%);
+.swing-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
-.toggle-thumb {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
+.toggle-slider {
   position: absolute;
-  top: 2px;
-  left: 2px;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(100, 116, 139, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.3);
   transition: all 0.3s ease;
+  border-radius: 32px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 24px;
+  width: 24px;
+  left: 4px;
+  bottom: 3px;
+  background: white;
+  transition: all 0.3s ease;
+  border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.delay-toggle.active .toggle-thumb {
-  left: 22px;
+.swing-toggle input:checked + .toggle-slider {
+  background: linear-gradient(135deg, #ff9a3c 0%, #ff7a1f 100%);
+  border-color: rgba(255, 154, 60, 0.4);
+  box-shadow: 0 0 12px rgba(255, 154, 60, 0.4);
+}
+
+.swing-toggle input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+
+.swing-toggle input:disabled + .toggle-slider {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .delay-time-display {
@@ -577,99 +606,69 @@ const selectDelayTime = (index: number) => {
   color: white;
 }
 
-.time-picker-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1001;
-}
-
-.time-picker-content {
+/* 时间选择器弹窗 */
+.time-picker-dialog {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.98) 0%,
-    rgba(26, 26, 46, 0.98) 25%,
-    rgba(42, 58, 90, 0.98) 50%,
-    rgba(58, 90, 122, 0.98) 75%,
-    rgba(58, 106, 154, 0.98) 100%
+    rgba(13, 13, 26, 0.95) 0%,
+    rgba(26, 26, 46, 0.95) 25%,
+    rgba(42, 58, 90, 0.95) 50%,
+    rgba(58, 90, 122, 0.95) 75%,
+    rgba(58, 106, 154, 0.95) 100%
   );
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 24px;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-  min-width: 280px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  min-width: 300px;
 }
 
 .time-picker-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.time-picker-title {
   font-size: 18px;
   font-weight: 600;
   color: white;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 .time-picker-options {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .time-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
+  border: 1px solid rgba(120, 170, 220, 0.3);
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  text-align: center;
 }
 
 .time-option:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
+  background: linear-gradient(135deg, rgba(80, 140, 190, 0.4) 0%, rgba(110, 160, 210, 0.35) 100%);
+  border-color: rgba(130, 180, 230, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .time-option.active {
-  background: linear-gradient(135deg, rgba(255, 154, 60, 0.25) 0%, rgba(255, 122, 31, 0.25) 100%);
+  background: linear-gradient(135deg, #ff9a3c 0%, #ff7a1f 100%);
   border-color: rgba(255, 154, 60, 0.4);
-}
-
-.option-text {
-  font-size: 14px;
-  font-weight: 500;
   color: white;
+  box-shadow: 0 4px 20px rgba(255, 154, 60, 0.4);
 }
 
-.check-icon {
-  width: 18px;
-  height: 18px;
-  color: #ff9a3c;
-}
-
-/* 选择器动画 */
-.picker-enter-active,
-.picker-leave-active {
-  transition: all 0.3s ease;
-}
-
-.picker-enter-from,
-.picker-leave-to {
-  opacity: 0;
-}
-
-.picker-enter-from .time-picker-content,
-.picker-leave-to .time-picker-content {
-  transform: scale(0.9);
-  opacity: 0;
+.time-option.active:hover {
+  background: linear-gradient(135deg, #ffaa4c 0%, #ff8a2f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(255, 154, 60, 0.5);
 }
 
 /* 弹窗动画 */

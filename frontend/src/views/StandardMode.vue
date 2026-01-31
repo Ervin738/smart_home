@@ -42,6 +42,10 @@ import {
   BottomHeaterBar,
   AirConditionerDialog,
   BottomAirConditionerBar,
+  FanDialog,
+  BottomFanBar,
+  DehumidifierDialog,
+  BottomDehumidifierBar,
   // 通用对话框
   TimerDialog,
   CountdownDialog,
@@ -157,6 +161,8 @@ const showClothesRackDialog = ref(false)
 const showHumidifierDialog = ref(false)
 const showHeaterDialog = ref(false)
 const showAirConditionerDialog = ref(false)
+const showFanDialog = ref(false)
+const showDehumidifierDialog = ref(false)
 const showTimerDialog = ref(false)
 const showCountdownDialog = ref(false)
 const showPowerDetailDialog = ref(false)
@@ -192,6 +198,10 @@ const showBottomHeaterBar = ref(false)
 const bottomHeaterDevice = ref<Device | null>(null)
 const showBottomAirConditionerBar = ref(false)
 const bottomAirConditionerDevice = ref<Device | null>(null)
+const showBottomFanBar = ref(false)
+const bottomFanDevice = ref<Device | null>(null)
+const showBottomDehumidifierBar = ref(false)
+const bottomDehumidifierDevice = ref<Device | null>(null)
 
 // 通知
 const timerNotification = ref<{ show: boolean; message: string }>({ show: false, message: '' })
@@ -226,6 +236,10 @@ const closeAllBottomBars = () => {
   bottomHeaterDevice.value = null
   showBottomAirConditionerBar.value = false
   bottomAirConditionerDevice.value = null
+  showBottomFanBar.value = false
+  bottomFanDevice.value = null
+  showBottomDehumidifierBar.value = false
+  bottomDehumidifierDevice.value = null
 }
 
 // 拖拽滚动
@@ -291,6 +305,10 @@ const onCardPressStart = (device: Device) => {
       showHeaterDialog.value = true
     } else if (device.type === 'environment' && device.environmentType === 'air-conditioner') {
       showAirConditionerDialog.value = true
+    } else if (device.type === 'environment' && device.environmentType === 'fan') {
+      showFanDialog.value = true
+    } else if (device.type === 'environment' && device.environmentType === 'dehumidifier') {
+      showDehumidifierDialog.value = true
     }
   }, INTERACTION_TIMING.LONG_PRESS_DURATION)
 }
@@ -307,7 +325,7 @@ const onCardClick = (device: Device) => {
       showSwitchDialog.value || showRouterDialog.value || showGatewayDialog.value || 
       showWifiExtenderDialog.value || showWashingMachineDialog.value || showDryerDialog.value || 
       showRobotVacuumDialog.value || showClothesRackDialog.value || showHumidifierDialog.value || 
-      showHeaterDialog.value || showAirConditionerDialog.value) return
+      showHeaterDialog.value || showAirConditionerDialog.value || showFanDialog.value || showDehumidifierDialog.value) return
   
   if (device.type === 'light' && device.lightType === 'table-lamp') {
     // 台灯单击显示底部控制栏
@@ -448,6 +466,26 @@ const onCardClick = (device: Device) => {
       closeAllBottomBars()
       bottomAirConditionerDevice.value = device
       showBottomAirConditionerBar.value = true
+    }
+  } else if (device.type === 'environment' && device.environmentType === 'fan') {
+    // 风扇单击显示底部控制栏
+    if (bottomFanDevice.value?.id === device.id) {
+      showBottomFanBar.value = false
+      bottomFanDevice.value = null
+    } else {
+      closeAllBottomBars()
+      bottomFanDevice.value = device
+      showBottomFanBar.value = true
+    }
+  } else if (device.type === 'environment' && device.environmentType === 'dehumidifier') {
+    // 除湿机单击显示底部控制栏
+    if (bottomDehumidifierDevice.value?.id === device.id) {
+      showBottomDehumidifierBar.value = false
+      bottomDehumidifierDevice.value = null
+    } else {
+      closeAllBottomBars()
+      bottomDehumidifierDevice.value = device
+      showBottomDehumidifierBar.value = true
     }
   } else {
     // 其他设备类型暂不处理
@@ -600,6 +638,18 @@ const onAirConditionerTogglePower = () => {
 const onAirConditionerUpdateTargetTemp = (value: number) => {
   if (bottomAirConditionerDevice.value) {
     devicesStore.setTargetTemp(bottomAirConditionerDevice.value.id, value)
+  }
+}
+
+const onFanTogglePower = () => {
+  if (bottomFanDevice.value) {
+    devicesStore.toggleStatus(bottomFanDevice.value.id)
+  }
+}
+
+const onDehumidifierTogglePower = () => {
+  if (bottomDehumidifierDevice.value) {
+    devicesStore.toggleStatus(bottomDehumidifierDevice.value.id)
   }
 }
 
@@ -860,6 +910,18 @@ devicesStore.onTimerExecute((device, action) => {
       @update:targetTemp="onAirConditionerUpdateTargetTemp"
     />
 
+    <BottomFanBar
+      :visible="showBottomFanBar"
+      :device="bottomFanDevice"
+      @toggle-power="onFanTogglePower"
+    />
+
+    <BottomDehumidifierBar
+      :visible="showBottomDehumidifierBar"
+      :device="bottomDehumidifierDevice"
+      @toggle-power="onDehumidifierTogglePower"
+    />
+
     <teleport to="body">
       <TableLampDialog
         v-model:visible="showTableLampDialog"
@@ -958,6 +1020,20 @@ devicesStore.onTimerExecute((device, action) => {
 
       <AirConditionerDialog
         v-model:visible="showAirConditionerDialog"
+        :device="selectedDevice"
+        @toggle-power="handleTogglePower"
+        @open-timer="handleOpenTimer"
+      />
+
+      <FanDialog
+        v-model:visible="showFanDialog"
+        :device="selectedDevice"
+        @toggle-power="handleTogglePower"
+        @open-timer="handleOpenTimer"
+      />
+
+      <DehumidifierDialog
+        v-model:visible="showDehumidifierDialog"
         :device="selectedDevice"
         @toggle-power="handleTogglePower"
         @open-timer="handleOpenTimer"

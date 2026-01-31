@@ -1,7 +1,7 @@
 <!--
-  空调底部控制栏
-  功能：单击空调设备卡片后显示，提供电源开关、模式切换和温度调节
-  触发：单击空调设备卡片
+  风扇底部控制栏
+  功能：单击风扇设备卡片后显示，提供电源开关、模式切换和风速调节
+  触发：单击风扇设备卡片
 -->
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
@@ -19,23 +19,23 @@ const emit = defineEmits<{
 
 const devicesStore = useDevicesStore()
 
-// 空调模式
-const acModes = ['制冷', '制热', '除湿']
+// 风扇模式
+const fanModes = ['直吹风', '自然风']
 const currentModeIndex = computed({
-  get: () => props.device?.acModeIndex ?? null,
-  set: (value: number | null) => {
+  get: () => props.device?.fanModeIndex ?? 0,
+  set: (value: number) => {
     if (props.device) {
-      devicesStore.setAcMode(props.device.id, value)
+      devicesStore.setFanMode(props.device.id, value)
     }
   }
 })
 
-// 使用计算属性从设备获取温度
-const localTargetTemp = computed({
-  get: () => props.device?.targetTemp ?? 26,
+// 使用计算属性从设备获取风速
+const localSpeedLevel = computed({
+  get: () => props.device?.speedLevel ?? 1,
   set: (value: number) => {
     if (props.device) {
-      devicesStore.setTargetTemp(props.device.id, value)
+      devicesStore.setSpeedLevel(props.device.id, value)
     }
   }
 })
@@ -44,32 +44,28 @@ const handleTogglePower = () => {
   emit('toggle-power')
 }
 
-const decreaseTemp = () => {
-  if (localTargetTemp.value > 16) {
-    localTargetTemp.value = localTargetTemp.value - 1
+const decreaseSpeed = () => {
+  if (localSpeedLevel.value > 1) {
+    localSpeedLevel.value = localSpeedLevel.value - 1
   }
 }
 
-const increaseTemp = () => {
-  if (localTargetTemp.value < 32) {
-    localTargetTemp.value = localTargetTemp.value + 1
+const increaseSpeed = () => {
+  if (localSpeedLevel.value < 4) {
+    localSpeedLevel.value = localSpeedLevel.value + 1
   }
 }
 
-// 切换空调模式
-const toggleAcMode = () => {
-  if (currentModeIndex.value === null) {
-    currentModeIndex.value = 0
-  } else {
-    currentModeIndex.value = (currentModeIndex.value + 1) % acModes.length
-  }
+// 切换风扇模式
+const toggleFanMode = () => {
+  currentModeIndex.value = (currentModeIndex.value + 1) % fanModes.length
 }
 </script>
 
 <template>
   <transition name="slide-up">
-    <div v-if="visible && device" class="bottom-ac-bar" @click.stop>
-      <div class="ac-bar-content">
+    <div v-if="visible && device" class="bottom-fan-bar" @click.stop>
+      <div class="fan-bar-content">
         <!-- 左侧电源按钮 -->
         <div class="control-section">
           <div 
@@ -84,56 +80,24 @@ const toggleAcMode = () => {
           </div>
         </div>
         
-        <!-- 中间模式按钮 -->
-        <div class="mode-section">
-          <div 
-            class="mode-btn"
-            :class="{ 
-              active: device.status === 'online' && currentModeIndex !== null,
-              disabled: device.status === 'offline'
-            }"
-            @click="device.status === 'online' && toggleAcMode()"
-          >
-            <!-- 默认模式图标 -->
-            <svg v-if="currentModeIndex === null" class="mode-icon" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-              <path d="M12 2v20M2 12h20" stroke="currentColor" stroke-width="2"/>
-            </svg>
-            <!-- 制冷图标（雪花） -->
-            <svg v-else-if="currentModeIndex === 0" class="mode-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2v20M17 7l-5 5-5-5M17 17l-5-5-5 5M2 12h20M7 7l5 5 5-5M7 17l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            <!-- 制热图标（太阳） -->
-            <svg v-else-if="currentModeIndex === 1" class="mode-icon" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <!-- 除湿图标（水滴） -->
-            <svg v-else-if="currentModeIndex === 2" class="mode-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-            </svg>
-            <span class="mode-text">{{ currentModeIndex !== null ? acModes[currentModeIndex] : '模式' }}</span>
-          </div>
-        </div>
-        
         <!-- 分隔线 -->
         <div class="divider"></div>
         
-        <!-- 右侧温度调节 -->
-        <div class="temp-section" :class="{ disabled: device.status === 'offline' }">
-          <button class="temp-btn" @click="decreaseTemp" :disabled="localTargetTemp <= 16 || device.status === 'offline'">
-            <svg class="temp-icon" viewBox="0 0 24 24" fill="none">
+        <!-- 右侧风速调节 -->
+        <div class="speed-section" :class="{ disabled: device.status === 'offline' }">
+          <button class="speed-btn" @click="decreaseSpeed" :disabled="localSpeedLevel <= 1 || device.status === 'offline'">
+            <svg class="speed-icon" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </button>
           
-          <div class="temp-display">
-            <span class="temp-value">{{ localTargetTemp }}</span>
-            <span class="temp-unit">°C</span>
+          <div class="speed-display">
+            <span class="speed-value">{{ localSpeedLevel }}</span>
+            <span class="speed-unit">档</span>
           </div>
           
-          <button class="temp-btn" @click="increaseTemp" :disabled="localTargetTemp >= 32 || device.status === 'offline'">
-            <svg class="temp-icon" viewBox="0 0 24 24" fill="none">
+          <button class="speed-btn" @click="increaseSpeed" :disabled="localSpeedLevel >= 4 || device.status === 'offline'">
+            <svg class="speed-icon" viewBox="0 0 24 24" fill="none">
               <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </button>
@@ -141,7 +105,7 @@ const toggleAcMode = () => {
         
         <!-- 顶部居中设备名称 -->
         <div class="device-name-wrapper">
-          <span class="device-name">{{ device.name }} · 空调</span>
+          <span class="device-name">{{ device.name }} · 风扇</span>
         </div>
       </div>
     </div>
@@ -149,15 +113,15 @@ const toggleAcMode = () => {
 </template>
 
 <style scoped>
-.bottom-ac-bar {
+.bottom-fan-bar {
   position: fixed;
-  bottom: 30px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
 }
 
-.ac-bar-content {
+.fan-bar-content {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -271,7 +235,7 @@ const toggleAcMode = () => {
   margin: 0 4px;
 }
 
-.temp-section {
+.speed-section {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -279,12 +243,12 @@ const toggleAcMode = () => {
   min-width: 280px;
 }
 
-.temp-section.disabled {
+.speed-section.disabled {
   opacity: 0.5;
   pointer-events: none;
 }
 
-.temp-btn {
+.speed-btn {
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -298,22 +262,22 @@ const toggleAcMode = () => {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.temp-btn:hover:not(:disabled) {
+.speed-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
   transform: scale(1.05);
 }
 
-.temp-btn:disabled {
+.speed-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.temp-icon {
+.speed-icon {
   width: 20px;
   height: 20px;
 }
 
-.temp-display {
+.speed-display {
   display: flex;
   align-items: baseline;
   gap: 4px;
@@ -321,19 +285,29 @@ const toggleAcMode = () => {
   min-width: 120px;
 }
 
-.temp-value {
-  font-size: 42px;
+.speed-value {
+  font-size: 40px;
   font-weight: 200;
   color: white;
   line-height: 1;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  letter-spacing: -2px;
+  text-shadow: 
+    0 0 30px rgba(255, 255, 255, 0.6),
+    0 0 60px rgba(255, 255, 255, 0.3),
+    0 2px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: -3px;
+  font-family: 'SF Pro Display', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
-.temp-unit {
-  font-size: 20px;
-  color: rgba(255, 255, 255, 0.7);
+.speed-unit {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
   font-weight: 300;
+  text-shadow: 
+    0 0 15px rgba(255, 255, 255, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0px;
+  font-family: 'SF Pro Display', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', -apple-system, sans-serif;
 }
 
 .device-name-wrapper {

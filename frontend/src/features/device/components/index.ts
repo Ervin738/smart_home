@@ -37,6 +37,10 @@ export { default as HeaterDialog } from './environment/HeaterDialog.vue'
 export { default as BottomHeaterBar } from './environment/BottomHeaterBar.vue'
 export { default as AirConditionerDialog } from './environment/AirConditionerDialog.vue'
 export { default as BottomAirConditionerBar } from './environment/BottomAirConditionerBar.vue'
+export { default as FanDialog } from './environment/FanDialog.vue'
+export { default as BottomFanBar } from './environment/BottomFanBar.vue'
+export { default as DehumidifierDialog } from './environment/DehumidifierDialog.vue'
+export { default as BottomDehumidifierBar } from './environment/BottomDehumidifierBar.vue'
 
 // 通用对话框
 export { default as TimerDialog } from './common/TimerDialog.vue'

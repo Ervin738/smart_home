@@ -23,6 +23,49 @@ const isWorking = ref(false)
 
 const modes = ['智能洗', '快速洗', '强力洗', '轻柔洗']
 
+// 当设备改变时，恢复该设备的状态
+watch(() => props.device?.id, (newId) => {
+  if (newId && props.device) {
+    const device = props.device as any
+    const modeName = device.washingModeName
+    if (modeName) {
+      selectedModeIndex.value = modes.indexOf(modeName)
+    } else {
+      selectedModeIndex.value = -1
+    }
+    isWorking.value = device.washingIsWorking ?? false
+  }
+})
+
+// 当状态改变时，同步到设备对象
+watch(selectedModeIndex, (newIndex) => {
+  if (props.device) {
+    const device = props.device as any
+    device.washingModeName = newIndex >= 0 ? modes[newIndex] : ''
+  }
+})
+
+watch(isWorking, (newValue) => {
+  if (props.device) {
+    const device = props.device as any
+    device.washingIsWorking = newValue
+  }
+})
+
+// 初始化时恢复状态
+watch(() => props.visible, (visible) => {
+  if (visible && props.device) {
+    const device = props.device as any
+    const modeName = device.washingModeName
+    if (modeName) {
+      selectedModeIndex.value = modes.indexOf(modeName)
+    } else {
+      selectedModeIndex.value = -1
+    }
+    isWorking.value = device.washingIsWorking ?? false
+  }
+})
+
 const canStart = computed(() => {
   return props.device?.status === 'online' && selectedModeIndex.value !== -1
 })
@@ -40,25 +83,16 @@ const handleStart = () => {
   emit('start-wash')
 }
 
-// 当设备改变时，重置状态
-watch(() => props.device?.id, () => {
-  selectedModeIndex.value = -1
-  isWorking.value = false
-})
-
-// 初始化时重置状态
-watch(() => props.visible, (visible) => {
-  if (visible) {
-    selectedModeIndex.value = -1
-    isWorking.value = false
-  }
-})
-
 // 关闭电源时重置状态
 watch(() => props.device?.status, (newStatus) => {
   if (newStatus === 'offline') {
     isWorking.value = false
     selectedModeIndex.value = -1
+    if (props.device) {
+      const device = props.device as any
+      device.washingModeName = ''
+      device.washingIsWorking = false
+    }
   }
 })
 </script>
@@ -149,19 +183,37 @@ watch(() => props.device?.status, (newStatus) => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
+  border: 1px solid rgba(120, 170, 220, 0.3);
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: none;
 }
 
 .btn-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+}
+
+.control-btn:hover {
+  background: linear-gradient(135deg, rgba(80, 140, 190, 0.4) 0%, rgba(110, 160, 210, 0.35) 100%);
+  border-color: rgba(130, 180, 230, 0.4);
+  box-shadow: none;
+}
+
+.control-btn.active {
+  background: rgb(59, 130, 246);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  box-shadow: none;
+  outline: none;
+  filter: none;
+  -webkit-filter: none;
 }
 
 .control-btn:hover {

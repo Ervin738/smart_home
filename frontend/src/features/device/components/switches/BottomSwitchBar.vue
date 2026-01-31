@@ -66,17 +66,20 @@ const emit = defineEmits<{
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 14px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
+  border: 1px solid rgba(120, 170, 220, 0.3);
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.2s;
-  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.3s ease;
+  color: rgba(255, 255, 255, 0.95);
+  box-shadow: none;
 }
 
 .control-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, rgba(80, 140, 190, 0.4) 0%, rgba(110, 160, 210, 0.35) 100%);
+  border-color: rgba(130, 180, 230, 0.4);
+  box-shadow: none;
 }
 
 .control-btn.active {
@@ -84,13 +87,10 @@ const emit = defineEmits<{
   border: none;
   border-radius: 16px;
   color: white;
-  box-shadow: none !important;
-  outline: none !important;
-  filter: none !important;
-  -webkit-filter: none !important;
-  isolation: isolate;
-  position: relative;
-  z-index: 1;
+  box-shadow: none;
+  outline: none;
+  filter: none;
+  -webkit-filter: none;
 }
 
 .control-btn.active::before {

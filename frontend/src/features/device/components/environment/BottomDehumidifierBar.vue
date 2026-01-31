@@ -1,11 +1,12 @@
 <!--
-  加湿器底部控制栏
-  功能：单击加湿器设备卡片后显示，提供电源开关和湿度档位调节
-  触发：单击加湿器设备卡片
+  除湿机底部控制栏
+  功能：单击除湿机设备卡片后显示，提供电源开关和模式切换
+  触发：单击除湿机设备卡片
 -->
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -14,38 +15,31 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'toggle-power'): void
-  (e: 'select-level', level: number): void
 }>()
 
-const selectedLevel = ref(1)
+const devicesStore = useDevicesStore()
 
-const levels = [
-  { label: '1档', value: 1 },
-  { label: '2档', value: 2 },
-  { label: '3档', value: 3 },
-  { label: '恒湿', value: 4 }
+const modes = [
+  { label: '智能', value: 0 },
+  { label: '睡眠', value: 1 },
+  { label: '干衣', value: 2 }
 ]
 
-const handleLevelSelect = (level: number) => {
+const selectedMode = ref(0)
+
+const handleModeSelect = (mode: number) => {
   if (props.device?.status === 'offline') return
-  selectedLevel.value = level
-  emit('select-level', level)
+  selectedMode.value = mode
+  if (props.device) {
+    devicesStore.setDehumidifierMode(props.device.id, mode)
+  }
 }
 
-// 当设备改变时，恢复该设备的档位状态
+// 当设备改变时，恢复该设备的模式状态
 watch(() => props.device?.id, (newId) => {
   if (newId && props.device) {
     const device = props.device as any
-    // 从设备属性中恢复档位，如果没有则默认为1
-    selectedLevel.value = device.humidifierLevel || 1
-  }
-})
-
-// 当档位改变时，同步到设备对象
-watch(selectedLevel, (newLevel) => {
-  if (props.device) {
-    const device = props.device as any
-    device.humidifierLevel = newLevel
+    selectedMode.value = device.dehumidifierModeIndex || 0
   }
 })
 
@@ -53,17 +47,17 @@ watch(selectedLevel, (newLevel) => {
 watch(() => props.visible, (visible) => {
   if (visible && props.device) {
     const device = props.device as any
-    selectedLevel.value = device.humidifierLevel || 1
+    selectedMode.value = device.dehumidifierModeIndex || 0
   }
 })
 
-// 关闭电源时重置档位为1档
+// 关闭电源时重置模式为智能
 watch(() => props.device?.status, (newStatus) => {
   if (newStatus === 'offline') {
-    selectedLevel.value = 1
+    selectedMode.value = 0
     if (props.device) {
       const device = props.device as any
-      device.humidifierLevel = 1
+      device.dehumidifierModeIndex = 0
     }
   }
 })
@@ -71,8 +65,8 @@ watch(() => props.device?.status, (newStatus) => {
 
 <template>
   <transition name="slide-up">
-    <div v-if="visible && device" class="bottom-humidifier-bar" @click.stop>
-      <div class="humidifier-bar-content">
+    <div v-if="visible && device" class="bottom-dehumidifier-bar" @click.stop>
+      <div class="dehumidifier-bar-content">
         <!-- 左侧电源按钮 -->
         <div class="control-section">
           <div 
@@ -90,31 +84,31 @@ watch(() => props.device?.status, (newStatus) => {
         <!-- 分隔线 -->
         <div class="divider"></div>
         
-        <!-- 右侧档位选择 -->
-        <div class="level-section">
+        <!-- 右侧模式选择 -->
+        <div class="mode-section">
           <div 
-            v-for="level in levels" 
-            :key="level.value"
-            class="level-btn"
+            v-for="mode in modes" 
+            :key="mode.value"
+            class="mode-btn"
             :class="{ 
-              active: selectedLevel === level.value,
+              active: selectedMode === mode.value,
               disabled: device.status === 'offline'
             }"
-            @click="handleLevelSelect(level.value)"
+            @click="handleModeSelect(mode.value)"
           >
-            <span class="level-label">{{ level.label }}</span>
+            <span class="mode-label">{{ mode.label }}</span>
           </div>
         </div>
         
         <!-- 顶部居中设备名称 -->
-        <div class="device-name">{{ device.name }} · 加湿器</div>
+        <div class="device-name">{{ device.name }} · 除湿机</div>
       </div>
     </div>
   </transition>
 </template>
 
 <style scoped>
-.bottom-humidifier-bar {
+.bottom-dehumidifier-bar {
   position: fixed;
   bottom: 30px;
   left: 50%;
@@ -122,7 +116,7 @@ watch(() => props.device?.status, (newStatus) => {
   z-index: 100;
 }
 
-.humidifier-bar-content {
+.dehumidifier-bar-content {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -193,7 +187,7 @@ watch(() => props.device?.status, (newStatus) => {
   margin: 0 4px;
 }
 
-.level-section {
+.mode-section {
   display: flex;
   gap: 8px;
   overflow-x: auto;
@@ -201,11 +195,11 @@ watch(() => props.device?.status, (newStatus) => {
   -ms-overflow-style: none;
 }
 
-.level-section::-webkit-scrollbar {
+.mode-section::-webkit-scrollbar {
   display: none;
 }
 
-.level-btn {
+.mode-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -218,27 +212,27 @@ watch(() => props.device?.status, (newStatus) => {
   white-space: nowrap;
 }
 
-.level-btn:hover {
+.mode-btn:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.level-btn.active {
+.mode-btn.active {
   background: rgb(59, 130, 246);
   border: none;
 }
 
-.level-btn.disabled {
+.mode-btn.disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.level-label {
+.mode-label {
   font-size: 15px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
 }
 
-.level-btn.active .level-label {
+.mode-btn.active .mode-label {
   color: white;
 }
 

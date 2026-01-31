@@ -26,6 +26,39 @@ const activeModeIndex = ref(-1)
 const activeControlIndex = ref(-1)
 const isCleaning = ref(false)
 
+// 当设备改变时，恢复该设备的状态
+watch(() => props.device?.id, (newId) => {
+  if (newId && props.device) {
+    const device = props.device as any
+    activeModeIndex.value = device.robotModeIndex ?? -1
+    isCleaning.value = device.robotIsCleaning ?? false
+  }
+})
+
+// 当状态改变时，同步到设备对象
+watch(activeModeIndex, (newIndex) => {
+  if (props.device) {
+    const device = props.device as any
+    device.robotModeIndex = newIndex
+  }
+})
+
+watch(isCleaning, (newValue) => {
+  if (props.device) {
+    const device = props.device as any
+    device.robotIsCleaning = newValue
+  }
+})
+
+// 初始化时恢复状态
+watch(() => props.visible, (visible) => {
+  if (visible && props.device) {
+    const device = props.device as any
+    activeModeIndex.value = device.robotModeIndex ?? -1
+    isCleaning.value = device.robotIsCleaning ?? false
+  }
+})
+
 // 使用扫地机器人控制
 const {
   suctionLevel: robotSuctionLevel,
@@ -58,6 +91,11 @@ watch(() => props.device?.status, (newStatus) => {
     activeModeIndex.value = -1
     activeControlIndex.value = -1
     isCleaning.value = false
+    if (props.device) {
+      const device = props.device as any
+      device.robotModeIndex = -1
+      device.robotIsCleaning = false
+    }
   }
 }, { flush: 'post' })
 
@@ -72,6 +110,12 @@ const handleCharge = () => {
       activeControlIndex.value = -1
     }
   }, INTERACTION_TIMING.CHARGE_DELAY)
+}
+
+const handleToggleCleaning = () => {
+  if (!props.device || props.device.status === 'offline' || activeModeIndex.value === -1) return
+  isCleaning.value = !isCleaning.value
+  emit('toggle-cleaning')
 }
 </script>
 
@@ -108,7 +152,7 @@ const handleCharge = () => {
           <div 
             class="control-btn"
             :class="{ 'power-on': isCleaning, disabled: device.status === 'offline' || activeModeIndex === -1 }"
-            @click="device.status === 'online' && activeModeIndex !== -1 && (isCleaning = !isCleaning, emit('toggle-cleaning'))"
+            @click="handleToggleCleaning"
           >
             <svg class="btn-svg-icon" viewBox="0 0 24 24" fill="none">
               <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

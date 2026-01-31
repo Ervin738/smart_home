@@ -22,7 +22,50 @@ const emit = defineEmits<{
 const activeModeIndex = ref(-1)
 const isWashing = ref(false)
 
-const modeOptions = ['智能洗', '随心洗烘', '快速洗', '大件洗', '单烘干', '羽绒服', '轻干洗', '单脱水']
+const modeOptions = ['智能洗', '随心洗烘', '快速洗', '大件洗', '轻柔洗', '强力洗', '轻干洗', '单脱水']
+
+// 当设备改变时，恢复该设备的状态
+watch(() => props.device?.id, (newId) => {
+  if (newId && props.device) {
+    const device = props.device as any
+    const modeName = device.washingModeName
+    if (modeName) {
+      activeModeIndex.value = modeOptions.indexOf(modeName)
+    } else {
+      activeModeIndex.value = -1
+    }
+    isWashing.value = device.washingIsWorking ?? false
+  }
+})
+
+// 当状态改变时，同步到设备对象
+watch(activeModeIndex, (newIndex) => {
+  if (props.device) {
+    const device = props.device as any
+    device.washingModeName = newIndex >= 0 ? modeOptions[newIndex] : ''
+  }
+})
+
+watch(isWashing, (newValue) => {
+  if (props.device) {
+    const device = props.device as any
+    device.washingIsWorking = newValue
+  }
+})
+
+// 初始化时恢复状态
+watch(() => props.visible, (visible) => {
+  if (visible && props.device) {
+    const device = props.device as any
+    const modeName = device.washingModeName
+    if (modeName) {
+      activeModeIndex.value = modeOptions.indexOf(modeName)
+    } else {
+      activeModeIndex.value = -1
+    }
+    isWashing.value = device.washingIsWorking ?? false
+  }
+})
 
 const handleModeSelect = (index: number) => {
   if (!props.device || props.device.status === 'offline') return
@@ -42,6 +85,11 @@ watch(() => props.device?.status, (newStatus) => {
   if (newStatus === 'offline') {
     activeModeIndex.value = -1
     isWashing.value = false
+    if (props.device) {
+      const device = props.device as any
+      device.washingModeName = ''
+      device.washingIsWorking = false
+    }
   }
 })
 </script>

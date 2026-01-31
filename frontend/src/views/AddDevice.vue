@@ -110,7 +110,19 @@ const addDevice = () => {
     ...formData.value,
     status: 'offline',
     // 为电暖器设置默认目标温度
-    ...(formData.value.type === 'environment' && formData.value.environmentType === 'heater' ? { targetTemp: 25 } : {})
+    ...(formData.value.type === 'environment' && formData.value.environmentType === 'heater' ? { targetTemp: 25 } : {}),
+    // 为风扇设置默认值
+    ...(formData.value.type === 'environment' && formData.value.environmentType === 'fan' ? { 
+      fanModeIndex: 0, 
+      speedLevel: 1, 
+      swingEnabled: false, 
+      swingAngle: 140 
+    } : {}),
+    // 为除湿机设置默认值
+    ...(formData.value.type === 'environment' && formData.value.environmentType === 'dehumidifier' ? { 
+      dehumidifierModeIndex: 0, 
+      targetHumidity: 50 
+    } : {})
   })
   formData.value = { name: '', type: '', lightType: '', switchType: '', cleanerType: '', securityType: '', environmentType: '', personalType: '', bathroomType: '', kitchenType: '', networkType: '', entertainmentType: '', otherType: '', location: '' }
   showForm.value = false
