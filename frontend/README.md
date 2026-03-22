@@ -48,21 +48,22 @@ Vue 3 (Composition API)
 src/
 ├── 📄 App.vue                    根组件（顶栏、路由视图）
 ├── 📄 main.ts                    应用入口
+├── 📄 style.css                  全局样式
 │
 ├── 📂 features/
 │   ├── 📂 device/                设备功能模块
 │   │   ├── 📂 components/        设备组件（按分类组织）
 │   │   │   ├── 🚿 bathroom/      卫浴（马桶、热水器、浴霸）
-│   │   │   ├── 🧹 cleaners/      清洁（洗衣机、烘干机、扫地机）
-│   │   │   ├── 🎮 entertainment/ 娱乐（电视、音响、投影仪）
-│   │   │   ├── 🌡️ environment/   环境（空调、净化器、风扇、加湿器等）
-│   │   │   ├── 🍳 kitchen/       厨房（电饭锅、油烟机、空气炸锅）
-│   │   │   ├── 💡 lights/        灯光
-│   │   │   ├── 🌐 network/       网络设备
-│   │   │   ├── 👤 personal/      个人设备
-│   │   │   ├── 🔒 security/      安防
+│   │   │   ├── 🧹 cleaners/      清洁（洗衣机、烘干机、扫地机、晾衣架）
+│   │   │   ├── 🎮 entertainment/ 娱乐（电视、音响、投影仪、时钟）
+│   │   │   ├── 🌡️ environment/   环境（空调、净化器、风扇、加湿器、除湿机、取暖器、香薰机）
+│   │   │   ├── 🍳 kitchen/       厨房（电饭锅、油烟机、空气炸锅、电热水壶、饮水机、电磁炉）
+│   │   │   ├── 💡 lights/        灯光（吸顶灯、台灯）
+│   │   │   ├── 🌐 network/       网络设备（路由器、网关、WiFi 扩展器）
+│   │   │   ├── 👤 personal/      个人设备（电热毯、智能床、智能枕头、开窗器）
+│   │   │   ├── 🔒 security/      安防（摄像头、门锁、智能门）
 │   │   │   ├── 🔌 switches/      开关插座
-│   │   │   └── 🔧 common/        通用组件（定时器、电量详情）
+│   │   │   └── 🔧 common/        通用组件（定时器、倒计时、电量详情）
 │   │   ├── 📂 composables/       设备控制逻辑复用
 │   │   │   ├── 📄 useBottomBar.ts
 │   │   │   ├── 📄 useDeviceControl.ts
@@ -70,7 +71,7 @@ src/
 │   │   │   └── 📄 useSliderControl.ts
 │   │   ├── 📂 store/             设备 Pinia Store
 │   │   └── 📂 types/             TypeScript 类型定义
-│   └── 📂 layout/                布局模块（导航栏、标签页）
+│   └── 📂 layout/                标签页布局（tabs.ts）
 │
 ├── 📂 views/
 │   ├── 📄 StandardMode.vue       主控制页面
@@ -88,7 +89,21 @@ src/
 │   ├── 📄 theme.ts               主题 Store
 │   └── 📄 layout.ts              布局 Store
 │
-├── 📂 shared/                    公共组件（时钟、天气、导航）
+├── 📂 shared/                    公共模块
+│   ├── 📂 components/            公共组件
+│   │   ├── 📄 NavBar.vue         顶部导航栏
+│   │   ├── 📄 SideBar.vue        侧边栏
+│   │   ├── 📄 Clock.vue          时钟组件
+│   │   ├── 📄 Weather.vue        天气组件
+│   │   ├── 📄 GlassCard.vue      毛玻璃卡片
+│   │   ├── 📄 BackgroundEffects.vue  背景粒子特效
+│   │   ├── 📄 Switchmode.vue     模式切换
+│   │   └── 📄 TimerNotification.vue  定时通知
+│   ├── 📂 composables/           公共逻辑复用
+│   │   └── 📄 useNameOverflow.ts 名称溢出检测
+│   └── 📂 utils/                 工具函数
+│       └── 📄 timeFormat.ts      时间格式化
+│
 ├── 📂 constants/                 设备类型、配置常量
 ├── 📂 router/                    路由配置
 └── 📂 plugins/                   插件（Element Plus 等）

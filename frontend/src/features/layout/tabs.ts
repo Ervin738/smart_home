@@ -20,7 +20,7 @@ export interface RoomRecord {
 
 export const useTabsStore = defineStore('tabs', () => {
   const rooms       = ref<RoomRecord[]>([])
-  const activeIndex = ref(0)
+  const activeIndex = ref(Number(localStorage.getItem('activeTabIndex') || 0))
 
   // 兼容旧代码：tabs = 房间名列表
   const tabs = ref<string[]>([])
@@ -45,6 +45,11 @@ export const useTabsStore = defineStore('tabs', () => {
         fp_locked: Boolean(r.fp_locked),
       }))
       syncDerived()
+      // 防止刷新后 index 越界（如房间被删除）
+      if (activeIndex.value >= rooms.value.length) {
+        activeIndex.value = 0
+        localStorage.setItem('activeTabIndex', '0')
+      }
     } catch (err) {
       console.warn('[Tabs] Failed to load rooms:', err)
     }
@@ -157,6 +162,7 @@ export const useTabsStore = defineStore('tabs', () => {
 
   const setActiveIndex = (index: number) => {
     activeIndex.value = index
+    localStorage.setItem('activeTabIndex', String(index))
   }
 
   /** 监听 socket room:changed，实时同步其他端的操作 */

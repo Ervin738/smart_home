@@ -23,7 +23,7 @@ function backendToDevice(row: Record<string, unknown>): Device {
     id:       String(row.id),
     name:     row.name as string,
     type:     row.type as Device['type'],
-    location: row.location as string ?? '',
+    location: (row.location as string) || '',
     status:   resolveStatus(status as Record<string, unknown>),
     ...extra,
   } as Device

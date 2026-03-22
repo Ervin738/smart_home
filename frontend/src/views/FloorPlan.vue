@@ -90,23 +90,45 @@ function autoLayoutDevice(
   roomH: number
 ): { x: number; y: number } {
   const cols = Math.max(1, Math.floor((roomW - CHIP_PAD) / (CHIP_W + CHIP_PAD)))
+
   // 收集所有其他设备的已知位置（包括 override 和 extra 里的）
-  const occupiedPositions = roomDevices
-    .filter(d => d.id !== device.id)
-    .map(d => {
-      if (devicePosOverride.value.has(d.id)) return devicePosOverride.value.get(d.id)!
-      const dd = d as any
-      if (dd.fp_dx != null && dd.fp_dy != null) return { x: Number(dd.fp_dx), y: Number(dd.fp_dy) }
-      return null
-    })
-    .filter(Boolean) as { x: number; y: number }[]
+  const knownPositions: { x: number; y: number }[] = []
+  // 未初始化的设备需要按 grid 顺序预分配位置，避免互相重叠
+  let gridSlot = 0
+
+  for (const d of roomDevices) {
+    if (d.id === device.id) continue
+    if (devicePosOverride.value.has(d.id)) {
+      knownPositions.push(devicePosOverride.value.get(d.id)!)
+      continue
+    }
+    const dd = d as any
+    if (dd.fp_dx != null && dd.fp_dy != null) {
+      knownPositions.push({ x: Number(dd.fp_dx), y: Number(dd.fp_dy) })
+      continue
+    }
+    // 未初始化设备：按 grid 顺序找一个不与已知位置冲突的槽位
+    while (true) {
+      const row = Math.floor(gridSlot / cols)
+      const col = gridSlot % cols
+      gridSlot++
+      const x = CHIP_PAD + col * (CHIP_W + CHIP_PAD)
+      const y = CHIP_TOP + row * (CHIP_H + CHIP_PAD)
+      if (y + CHIP_H > roomH - CHIP_BOTTOM_PAD) continue
+      const blocked = knownPositions.some(p => Math.abs(p.x - x) < CHIP_W && Math.abs(p.y - y) < CHIP_H)
+      if (!blocked) {
+        knownPositions.push({ x, y })
+        break
+      }
+    }
+  }
 
   for (let row = 0; ; row++) {
     for (let col = 0; col < cols; col++) {
       const x = CHIP_PAD + col * (CHIP_W + CHIP_PAD)
       const y = CHIP_TOP + row * (CHIP_H + CHIP_PAD)
       if (y + CHIP_H > roomH - CHIP_BOTTOM_PAD) continue
-      const overlaps = occupiedPositions.some(p =>
+      const overlaps = knownPositions.some(p =>
         Math.abs(p.x - x) < CHIP_W && Math.abs(p.y - y) < CHIP_H
       )
       if (!overlaps) return { x, y }
