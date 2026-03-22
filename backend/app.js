@@ -16,7 +16,7 @@ const app    = express();
 const server = http.createServer(app);
 
 // ── 中间件 ────────────────────────────────────────────────────────────────────
-app.use(cors({ origin: '*', methods: ['GET','POST','PUT','DELETE','OPTIONS'] }));
+app.use(cors({ origin: '*', methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'] }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

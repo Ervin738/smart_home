@@ -2,7 +2,7 @@
   平面图模式 - 与后端持久化同步，与标准模式导航栏房间共享数据
 -->
 <script setup lang="ts">
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch, onMounted } from 'vue'
 import { useThemeStore } from '@/stores/theme'
 import { useTabsStore } from '@/features/layout/tabs'
 import { useDevicesStore } from '@/features/device/store/devices.store'
@@ -82,20 +82,15 @@ function getDevicePos(device: Device): { x: number; y: number } {
   return { x: -1, y: -1 } // 未初始化，由 autoLayoutDevice 处理
 }
 
-/** 计算新设备的初始位置：从左上角按行排列，不与已有设备重叠 */
+/** 计算新设备的初始位置：沿四周边缘顺时针排列 */
 function autoLayoutDevice(
   device: Device,
   roomDevices: Device[],
   roomW: number,
   roomH: number
 ): { x: number; y: number } {
-  const cols = Math.max(1, Math.floor((roomW - CHIP_PAD) / (CHIP_W + CHIP_PAD)))
-
-  // 收集所有其他设备的已知位置（包括 override 和 extra 里的）
+  // 收集已知位置
   const knownPositions: { x: number; y: number }[] = []
-  // 未初始化的设备需要按 grid 顺序预分配位置，避免互相重叠
-  let gridSlot = 0
-
   for (const d of roomDevices) {
     if (d.id === device.id) continue
     if (devicePosOverride.value.has(d.id)) {
@@ -105,49 +100,57 @@ function autoLayoutDevice(
     const dd = d as any
     if (dd.fp_dx != null && dd.fp_dy != null) {
       knownPositions.push({ x: Number(dd.fp_dx), y: Number(dd.fp_dy) })
-      continue
-    }
-    // 未初始化设备：按 grid 顺序找一个不与已知位置冲突的槽位
-    while (true) {
-      const row = Math.floor(gridSlot / cols)
-      const col = gridSlot % cols
-      gridSlot++
-      const x = CHIP_PAD + col * (CHIP_W + CHIP_PAD)
-      const y = CHIP_TOP + row * (CHIP_H + CHIP_PAD)
-      if (y + CHIP_H > roomH - CHIP_BOTTOM_PAD) continue
-      const blocked = knownPositions.some(p => Math.abs(p.x - x) < CHIP_W && Math.abs(p.y - y) < CHIP_H)
-      if (!blocked) {
-        knownPositions.push({ x, y })
-        break
-      }
     }
   }
 
-  for (let row = 0; ; row++) {
-    for (let col = 0; col < cols; col++) {
-      const x = CHIP_PAD + col * (CHIP_W + CHIP_PAD)
-      const y = CHIP_TOP + row * (CHIP_H + CHIP_PAD)
-      if (y + CHIP_H > roomH - CHIP_BOTTOM_PAD) continue
-      const overlaps = knownPositions.some(p =>
-        Math.abs(p.x - x) < CHIP_W && Math.abs(p.y - y) < CHIP_H
-      )
-      if (!overlaps) return { x, y }
-    }
-    if (row > 20) break
+  // 沿四周顺时针生成候选位置：上边 → 右边 → 下边 → 左边
+  const candidates: { x: number; y: number }[] = []
+  const stepX = CHIP_W + CHIP_PAD
+  const stepY = CHIP_H + CHIP_PAD
+
+  // 上边（从左到右）
+  for (let x = CHIP_PAD; x + CHIP_W <= roomW - CHIP_PAD; x += stepX)
+    candidates.push({ x, y: CHIP_PAD })
+  // 右边（从上到下）
+  for (let y = CHIP_PAD; y + CHIP_H <= roomH - CHIP_BOTTOM_PAD; y += stepY)
+    candidates.push({ x: roomW - CHIP_PAD - CHIP_W, y })
+  // 下边（从右到左）
+  for (let x = roomW - CHIP_PAD - CHIP_W; x >= CHIP_PAD; x -= stepX)
+    candidates.push({ x, y: roomH - CHIP_BOTTOM_PAD - CHIP_H })
+  // 左边（从下到上）
+  for (let y = roomH - CHIP_BOTTOM_PAD - CHIP_H; y >= CHIP_PAD; y -= stepY)
+    candidates.push({ x: CHIP_PAD, y })
+
+  for (const pos of candidates) {
+    const blocked = knownPositions.some(p =>
+      Math.abs(p.x - pos.x) < CHIP_W && Math.abs(p.y - pos.y) < CHIP_H
+    )
+    if (!blocked) return pos
   }
-  return { x: CHIP_PAD, y: CHIP_TOP }
+  return { x: CHIP_PAD, y: CHIP_PAD }
 }
 
 function getOrInitDevicePos(device: Device, roomDevices: Device[], roomW: number, roomH: number) {
   const pos = getDevicePos(device)
   if (pos.x >= 0) return pos
-  // 未初始化，自动排列
-  const newPos = autoLayoutDevice(device, roomDevices, roomW, roomH)
-  // 立即写入 override，让同房间其他设备初始化时能感知到此位置
-  devicePosOverride.value = new Map(devicePosOverride.value).set(device.id, newPos)
-  devicesStore.setDeviceExtra(device.id, { fp_dx: newPos.x, fp_dy: newPos.y })
-  return newPos
+  // 未初始化，返回默认位置但不触发副作用（副作用由 watch 处理）
+  return autoLayoutDevice(device, roomDevices, roomW, roomH)
 }
+
+// 只在挂载时初始化一次未设置位置的设备，避免响应式循环
+onMounted(() => {
+  for (const device of devicesStore.devices) {
+    const d = device as any
+    if (d.fp_dx != null && d.fp_dy != null) continue
+    if (devicePosOverride.value.has(device.id)) continue
+    const room = tabsStore.rooms.find(r => r.name === device.location && r.fp_x !== null)
+    if (!room) continue
+    const roomDevices = devicesStore.devices.filter(d => d.location === device.location)
+    const newPos = autoLayoutDevice(device, roomDevices, Number(room.fp_w ?? 120), Number(room.fp_h ?? 90))
+    devicePosOverride.value.set(device.id, newPos)
+    devicesStore.setDeviceExtra(device.id, { fp_dx: newPos.x, fp_dy: newPos.y })
+  }
+})
 
 function onDeviceMouseDown(e: MouseEvent, device: Device, room: { fp_x: number|null; fp_y: number|null; fp_w: number|null; fp_h: number|null }, roomDevices: Device[]) {
   e.preventDefault(); e.stopPropagation()
@@ -555,22 +558,22 @@ function onRoomContextMenu(e: MouseEvent, roomId: number) {
               <button class="room-power-btn off" @click.stop="handleRoomOff(room.name)" title="关闭本房间所有设备">🌙</button>
             </div>
             <div v-if="devicesInRoom(room.name).length > 0" class="device-grid">
-              <div
-                v-for="device in devicesInRoom(room.name)"
-                :key="device.id"
-                class="device-chip"
-                :class="{ online: device.status === 'online' }"
-                :style="{
-                  position: 'absolute',
-                  left: getOrInitDevicePos(device, devicesInRoom(room.name), Number(room.fp_w ?? 120), Number(room.fp_h ?? 90)).x + 'px',
-                  top:  getOrInitDevicePos(device, devicesInRoom(room.name), Number(room.fp_w ?? 120), Number(room.fp_h ?? 90)).y + 'px',
-                }"
-                :title="device.name + ' · ' + getDeviceDisplayType(device)"
-                @mousedown.stop="onDeviceMouseDown($event, device, room, devicesInRoom(room.name))"
-                @click.stop="onDeviceChipClick($event, device)"
-              >
-                <span class="device-icon">{{ getDeviceIcon(device) }}</span>
-              </div>
+              <template v-for="device in devicesInRoom(room.name)" :key="device.id">
+                <div
+                  class="device-chip"
+                  :class="{ online: device.status === 'online' }"
+                  :style="{
+                    position: 'absolute',
+                    left: getDevicePos(device).x + 'px',
+                    top:  getDevicePos(device).y + 'px',
+                  }"
+                  :title="device.name + ' · ' + getDeviceDisplayType(device)"
+                  @mousedown.stop="onDeviceMouseDown($event, device, room, devicesInRoom(room.name))"
+                  @click.stop="onDeviceChipClick($event, device)"
+                >
+                  <span class="device-icon">{{ getDeviceIcon(device) }}</span>
+                </div>
+              </template>
             </div>
           </template>
         </div>

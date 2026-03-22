@@ -23,6 +23,7 @@ function doSyncExtra(device: Device) {
   // status 和 extra 一起写，避免两个请求竞态覆盖
   deviceApi.update(id, { status: { power: status === 'online' }, extra })
     .catch(err => console.warn('[Store] Failed to sync extra:', err))
+  // 后端按各子类型表的列名过滤，直接传全量 extra 即可
   deviceApi.updateState(id, extra)
     .catch(() => { /* 设备可能没有对应状态表，静默忽略 */ })
 }

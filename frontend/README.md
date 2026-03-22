@@ -7,6 +7,7 @@
 [![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Pinia](https://img.shields.io/badge/Pinia-3.0-FFD859?style=flat-square&logo=pinia&logoColor=black)](https://pinia.vuejs.org/)
 [![Element Plus](https://img.shields.io/badge/Element_Plus-2.13-409EFF?style=flat-square&logo=element&logoColor=white)](https://element-plus.org/)
+[![Vitest](https://img.shields.io/badge/Vitest-4.1-6E9F18?style=flat-square&logo=vitest&logoColor=white)](https://vitest.dev/)
 
 ---
 
@@ -37,7 +38,8 @@ Vue 3 (Composition API)
 ├── Element Plus 2.13       UI 组件库
 ├── ECharts 6.0             数据可视化
 ├── Socket.IO Client 4.8    实时通信
-└── Axios 1.13              HTTP 请求
+├── Axios 1.13              HTTP 请求
+└── Vitest 4.1 + fast-check 单元测试 & 属性测试
 ```
 
 ---
@@ -147,9 +149,9 @@ VITE_SOCKET_URL=http://localhost:3000
 | `npm run build` | 生产构建 |
 | `npm run preview` | 预览构建产物 |
 | `npm run type-check` | TypeScript 类型检查 |
-| `npm run test` | 运行单元测试（单次） |
-| `npm run test:watch` | 监听模式运行测试 |
-| `npm run test:ui` | 可视化测试界面 |
+| `npm run test` | 运行单元测试（单次，`vitest --run`） |
+| `npm run test:watch` | 监听模式运行测试（`vitest`） |
+| `npm run test:ui` | 可视化测试界面（`vitest --ui`） |
 
 ---
 

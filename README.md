@@ -111,7 +111,8 @@ Vue 3 (Composition API)
 ├── Element Plus 2.13       UI 组件库
 ├── ECharts 6.0             数据可视化
 ├── Socket.IO Client 4.8    实时通信
-└── Axios 1.13              HTTP 请求
+├── Axios 1.13              HTTP 请求
+└── Vitest 4.1 + fast-check 单元测试 & 属性测试
 ```
 
 ### 项目结构
@@ -178,9 +179,9 @@ src/
 | `npm run build` | 生产构建 |
 | `npm run preview` | 预览构建产物 |
 | `npm run type-check` | TypeScript 类型检查 |
-| `npm run test` | 运行单元测试（单次） |
-| `npm run test:watch` | 监听模式运行测试 |
-| `npm run test:ui` | 可视化测试界面 |
+| `npm run test` | 运行单元测试（单次，`vitest --run`） |
+| `npm run test:watch` | 监听模式运行测试（`vitest`） |
+| `npm run test:ui` | 可视化测试界面（`vitest --ui`） |
 
 ---
 
