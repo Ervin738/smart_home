@@ -24,6 +24,10 @@ async function applySceneRules(rules, io = null) {
       results.push({ deviceId, success: false, error: 'Device not found' });
       continue;
     }
+    if (updated._offline) {
+      results.push({ deviceId, success: false, error: 'Device is offline' });
+      continue;
+    }
 
     await Log.create({ action: `scene_trigger:device_${deviceId}`, deviceId });
 

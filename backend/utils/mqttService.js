@@ -52,6 +52,10 @@ function init(io = null) {
       console.warn(`[MQTT] Device ${deviceId} not found in simulator.`);
       return;
     }
+    if (updated._offline) {
+      console.warn(`[MQTT] Device ${deviceId} is offline, status report ignored.`);
+      return;
+    }
 
     // 2. Log the action
     await Log.create({ action: `mqtt_report:device_${deviceId}`, deviceId })

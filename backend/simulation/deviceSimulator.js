@@ -9,6 +9,14 @@ const DEFAULT_STATE = {
   camera:  { power: false, recording: false, motion: false },
 };
 
+// Fault simulation config
+const FAULT_CONFIG = {
+  offlineProb:       0.001,  // probability per tick that a device goes offline
+  reconnectMinMs:    5000,   // minimum offline duration before reconnect
+  reconnectMaxMs:    15000,  // maximum offline duration before reconnect
+  stateResetProb:    0.3,    // probability that state is lost (reset to default) on reconnect
+};
+
 class DeviceSimulator {
   constructor() {
     this.devices = new Map();
@@ -35,6 +43,56 @@ class DeviceSimulator {
       });
     }
     console.log(`[Simulator] Loaded ${this.devices.size} device(s).`);
+  }
+
+  // ─── Fault simulation ──────────────────────────────────────────────────────
+
+  /**
+   * Randomly trigger offline, and handle reconnect timing.
+   * Returns true if the device state changed (went offline or came back).
+   */
+  _tickFault(device) {
+    const now = Date.now();
+
+    // Already offline — check if it's time to reconnect
+    if (device.offline) {
+      if (now - device._offlineSince >= device._reconnectDelay) {
+        device.offline = false;
+        delete device._offlineSince;
+        delete device._reconnectDelay;
+
+        // Simulate state inconsistency: device may lose its state on reconnect
+        if (Math.random() < FAULT_CONFIG.stateResetProb) {
+          device.status = { ...(DEFAULT_STATE[device.type] ?? {}) };
+          console.log(`[Simulator] Device ${device.id} reconnected with state reset.`);
+        } else {
+          console.log(`[Simulator] Device ${device.id} reconnected, state preserved.`);
+        }
+
+        this._io?.emit('device:reconnected', {
+          deviceId: device.id,
+          status:   { ...device.status },
+        });
+        if (this._mqtt) this._mqtt.publishStatus(device.id, device.status);
+        return true;
+      }
+      return false; // still offline, nothing to do
+    }
+
+    // Online — randomly go offline
+    if (Math.random() < FAULT_CONFIG.offlineProb) {
+      device.offline = true;
+      device._offlineSince  = now;
+      device._reconnectDelay =
+        FAULT_CONFIG.reconnectMinMs +
+        Math.random() * (FAULT_CONFIG.reconnectMaxMs - FAULT_CONFIG.reconnectMinMs);
+
+      console.log(`[Simulator] Device ${device.id} went offline. Will reconnect in ~${Math.round(device._reconnectDelay / 1000)}s`);
+      this._io?.emit('device:offline', { deviceId: device.id });
+      return true;
+    }
+
+    return false;
   }
 
   // ─── Tick logic per device type ────────────────────────────────────────────
@@ -67,6 +125,10 @@ class DeviceSimulator {
   /** Run one simulation tick across all devices */
   _tick() {
     for (const device of this.devices.values()) {
+      // Run fault simulation first; skip normal tick if device is offline
+      const faultChanged = this._tickFault(device);
+      if (device.offline) continue;
+
       let changed = false;
 
       if (device.type === 'ac')      changed = this._tickAc(device);
@@ -132,6 +194,12 @@ class DeviceSimulator {
     const device = this.devices.get(Number(deviceId));
     if (!device) return null;
 
+    // Reject commands while device is offline
+    if (device.offline) {
+      console.warn(`[Simulator] Command rejected: device ${deviceId} is offline.`);
+      return { _offline: true };
+    }
+
     // Validate type-specific constraints
     const s = device.status;
     const merged = { ...s, ...action };
@@ -190,16 +258,17 @@ class DeviceSimulator {
    */
   getDeviceStatus(deviceId) {
     const device = this.devices.get(Number(deviceId));
-    return device ? { ...device.status } : null;
+    return device ? { ...device.status, offline: device.offline ?? false } : null;
   }
 
   /** Return all device states as a plain array */
   getAllStatuses() {
     return Array.from(this.devices.values()).map(d => ({
-      id:     d.id,
-      name:   d.name,
-      type:   d.type,
-      status: { ...d.status },
+      id:      d.id,
+      name:    d.name,
+      type:    d.type,
+      offline: d.offline ?? false,
+      status:  { ...d.status },
     }));
   }
 }
