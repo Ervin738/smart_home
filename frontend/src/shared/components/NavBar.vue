@@ -4,17 +4,74 @@
   位置：页面顶部
 -->
 <script setup lang="ts">
-import { ref, computed, nextTick, watch, onMounted } from 'vue'
+import { ref, nextTick, watch, onMounted } from 'vue'
 import { useTabsStore } from '@/features/layout/tabs'
+import { useThemeStore } from '@/stores/theme'
 
 const tabsStore = useTabsStore()
+const themeStore = useThemeStore()
 const showAddDialog = ref(false)
 const showDeleteDialog = ref(false)
 const deleteIndex = ref(-1)
 const newTabName = ref('')
 const isDuplicate = ref(false)
 
-// 液态效果相关
+// 右键菜单
+const contextMenu = ref({ visible: false, x: 0, y: 0, index: -1 })
+const showRenameDialog = ref(false)
+const renameIndex = ref(-1)
+const renameName = ref('')
+const renameIsDuplicate = ref(false)
+
+const openContextMenu = (e: MouseEvent, index: number) => {
+  e.preventDefault()
+  contextMenu.value = { visible: true, x: e.clientX, y: e.clientY, index }
+}
+
+const closeContextMenu = () => { contextMenu.value.visible = false }
+
+const startRename = () => {
+  renameIndex.value = contextMenu.value.index
+  renameName.value = tabsStore.tabs[renameIndex.value] || ''
+  renameIsDuplicate.value = false
+  showRenameDialog.value = true
+  closeContextMenu()
+}
+
+const confirmRename = async () => {
+  const name = renameName.value.trim()
+  if (!name) return
+  if (name !== tabsStore.tabs[renameIndex.value] && tabsStore.tabs.includes(name)) {
+    renameIsDuplicate.value = true
+    return
+  }
+  await tabsStore.renameTab(renameIndex.value, name)
+  showRenameDialog.value = false
+}
+
+const startDelete = () => {
+  deleteIndex.value = contextMenu.value.index
+  showDeleteDialog.value = true
+  closeContextMenu()
+}
+
+const moveTab = async (dir: -1 | 1) => {
+  const index = contextMenu.value.index
+  const newIndex = index + dir
+  if (newIndex < 0 || newIndex >= tabsStore.rooms.length) { closeContextMenu(); return }
+  const newRooms = [...tabsStore.rooms]
+  const [moved] = newRooms.splice(index, 1)
+  newRooms.splice(newIndex, 0, moved)
+  await tabsStore.reorderRooms(newRooms.map(r => r.id))
+  if (tabsStore.activeIndex === index) tabsStore.setActiveIndex(newIndex)
+  closeContextMenu()
+}
+
+watch(renameName, (v) => {
+  const t = v.trim()
+  renameIsDuplicate.value = t !== '' && t !== tabsStore.tabs[renameIndex.value] && tabsStore.tabs.includes(t)
+})
+
 const navItemsRef = ref<HTMLElement[]>([])
 const liquidBgStyle = ref({
   left: '0px',
@@ -91,7 +148,7 @@ const closeAddDialog = () => {
   isDuplicate.value = false
 }
 
-const addTab = () => {
+const addTab = async () => {
   const name = newTabName.value.trim()
   if (!name) return
   
@@ -100,7 +157,7 @@ const addTab = () => {
     return
   }
   
-  tabsStore.addTab(name)
+  await tabsStore.addTab(name)
   closeAddDialog()
   updateLiquidBg()
 }
@@ -126,7 +183,7 @@ const addTab = () => {
         class="nav-item"
         :class="{ active: tabsStore.activeIndex === index }"
         @click="selectTab(index)"
-        @contextmenu.prevent="confirmDelete(index)"
+        @contextmenu.prevent="openContextMenu($event, index)"
       >
         {{ tab }}
       </div>
@@ -142,6 +199,51 @@ const addTab = () => {
     </div>
 
     <teleport to="body">
+      <!-- 右键菜单 -->
+      <div v-if="contextMenu.visible" class="ctx-mask" @click="closeContextMenu" @contextmenu.prevent="closeContextMenu">
+        <div class="ctx-menu" :style="{ left: contextMenu.x + 'px', top: contextMenu.y + 'px' }" @click.stop>
+          <div class="ctx-item" @click="startRename">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9 2L11 4L4.5 10.5H2.5V8.5L9 2Z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            改名
+          </div>
+          <div class="ctx-item" :class="{ disabled: contextMenu.index === 0 }" @click="moveTab(-1)">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 10V3M3 6.5L6.5 3L10 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            左移
+          </div>
+          <div class="ctx-item" :class="{ disabled: contextMenu.index === tabsStore.tabs.length - 1 }" @click="moveTab(1)">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 3V10M10 6.5L6.5 10L3 6.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            右移
+          </div>
+          <div class="ctx-divider"></div>
+          <div class="ctx-item danger" @click="startDelete">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M2 3.5H11M4.5 3.5V2.5H8.5V3.5M5 6V10M8 6V10M3 3.5L3.5 11H9.5L10 3.5H3Z" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            删除
+          </div>
+        </div>
+      </div>
+
+      <!-- 改名弹窗 -->
+      <transition name="dialog">
+        <div v-if="showRenameDialog" class="dialog-overlay" @click="showRenameDialog = false">
+          <div class="dialog-content" @click.stop>
+            <div class="dialog-header">改名</div>
+            <input
+              v-model="renameName"
+              class="dialog-input"
+              :class="{ error: renameIsDuplicate }"
+              placeholder="输入新名称"
+              @keyup.enter="confirmRename"
+              autofocus
+            />
+            <div v-if="renameIsDuplicate" class="error-message">房间名称已存在</div>
+            <div class="dialog-actions">
+              <button class="dialog-btn cancel" @click="showRenameDialog = false">取消</button>
+              <button class="dialog-btn confirm" :disabled="renameIsDuplicate || !renameName.trim()" @click="confirmRename">确定</button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <transition name="dialog">
         <div v-if="showDeleteDialog" class="dialog-overlay" @click="showDeleteDialog = false">
           <div class="dialog-content" @click.stop>
@@ -183,19 +285,15 @@ const addTab = () => {
   display: flex;
   align-items: stretch;
   height: 52px;
-  background: linear-gradient(
-    135deg,
-    rgba(26, 42, 78, 0.45) 0%,
-    rgba(42, 58, 90, 0.4) 30%,
-    rgba(58, 90, 122, 0.45) 70%,
-    rgba(42, 58, 90, 0.4) 100%
-  );
-  backdrop-filter: blur(30px) saturate(120%);
-  -webkit-backdrop-filter: blur(30px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(255, 255, 255, 0.25)"');
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid v-bind('themeStore.currentTheme?.isDark ? "rgba(255, 255, 255, 0.18)" : "rgba(59, 130, 246, 0.2)"');
   border-radius: 26px;
   overflow: hidden;
   position: relative;
+  transition: all 0.3s ease;
+  box-shadow: v-bind('themeStore.currentTheme?.isDark ? "none" : "0 4px 16px rgba(59, 130, 246, 0.08)"');
 }
 
 .nav-items {
@@ -213,54 +311,43 @@ const addTab = () => {
   position: absolute;
   top: 8px;
   bottom: 8px;
-  background: linear-gradient(
-    135deg,
-    rgba(58, 90, 122, 0.6) 0%,
-    rgba(42, 58, 90, 0.5) 100%
-  );
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(255, 255, 255, 0.15)"');
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
   border-radius: 18px;
   transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
   pointer-events: none;
   z-index: 0;
   box-shadow: 
-    0 4px 16px rgba(0, 0, 0, 0.3),
-    0 2px 8px rgba(58, 106, 154, 0.15),
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 4px 16px v-bind('themeStore.currentTheme?.isDark ? "rgba(0, 0, 0, 0.3)" : "rgba(59, 130, 246, 0.15)"'),
+    inset 0 1px 2px v-bind('themeStore.currentTheme?.isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(255, 255, 255, 0.3)"'),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid v-bind('themeStore.currentTheme?.isDark ? "rgba(255, 255, 255, 0.2)" : "rgba(59, 130, 246, 0.25)"');
 }
 
 .liquid-bg::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.06) 0%,
-    transparent 35%,
-    transparent 65%,
-    rgba(58, 106, 154, 0.08) 100%
-  );
-  border-radius: 18px;
-  pointer-events: none;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, v-bind('themeStore.currentTheme?.isDark ? "rgba(255, 255, 255, 0.4)" : "rgba(255, 255, 255, 0.6)"'), transparent);
+  opacity: 0.5;
 }
 
 .liquid-bg::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse 80% 50% at 50% 0%,
-    rgba(255, 255, 255, 0.08) 0%,
-    transparent 60%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
   border-radius: 18px;
   pointer-events: none;
+  opacity: v-bind('themeStore.currentTheme?.isDark ? "0.6" : "0.4"');
 }
 
 .empty-hint {
-  color: rgba(255, 255, 255, 0.5);
+  color: v-bind('themeStore.textColorSecondary');
   font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.3px;
@@ -277,7 +364,7 @@ const addTab = () => {
   justify-content: center;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.6);
+  color: v-bind('themeStore.textColorSecondary');
   cursor: pointer;
   transition: all 0.3s ease;
   white-space: nowrap;
@@ -289,16 +376,29 @@ const addTab = () => {
   flex: 1;
   min-width: 0;
   z-index: 1;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
 .nav-item:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: v-bind('themeStore.textColorHover');
 }
 
 .nav-item.active {
-  color: white;
+  color: v-bind('themeStore.textColor');
   font-weight: 600;
+}
+
+.nav-item.drag-over {
+  border-left: 2px solid v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.6)" : "rgba(59,130,246,0.8)"');
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.06)" : "rgba(59,130,246,0.08)"');
+}
+
+.nav-item[draggable="true"] {
+  cursor: grab;
+}
+
+.nav-item[draggable="true"]:active {
+  cursor: grabbing;
 }
 
 .nav-divider {
@@ -322,7 +422,7 @@ const addTab = () => {
   justify-content: center;
   width: 52px;
   height: 100%;
-  color: rgba(255, 255, 255, 0.75);
+  color: v-bind('themeStore.textColorSecondary');
   font-size: 24px;
   font-weight: 300;
   line-height: 1;
@@ -349,26 +449,18 @@ const addTab = () => {
 }
 
 .add-btn:hover {
-  color: rgba(255, 255, 255, 0.95);
+  color: v-bind('themeStore.textColor');
 }
 
 .add-btn:hover::before {
-  background: linear-gradient(
-    135deg,
-    rgba(58, 106, 154, 0.2) 0%,
-    rgba(42, 58, 90, 0.15) 100%
-  );
+  background: rgba(255, 255, 255, 0.08);
   box-shadow: 
-    0 2px 12px rgba(58, 106, 154, 0.2),
+    0 2px 12px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 .add-btn:active::before {
-  background: linear-gradient(
-    135deg,
-    rgba(58, 106, 154, 0.3) 0%,
-    rgba(42, 58, 90, 0.25) 100%
-  );
+  background: rgba(255, 255, 255, 0.12);
   transform: scale(0.95);
 }
 
@@ -436,5 +528,61 @@ const addTab = () => {
   opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/* 右键菜单 */
+.ctx-mask {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+}
+
+.ctx-menu {
+  position: fixed;
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(10,30,40,0.92)" : "rgba(255,255,255,0.92)"');
+  backdrop-filter: blur(16px);
+  border: 1px solid v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.12)" : "rgba(59,130,246,0.2)"');
+  border-radius: 10px;
+  padding: 4px;
+  min-width: 100px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  z-index: 2001;
+}
+
+.ctx-item {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 7px;
+  cursor: pointer;
+  color: v-bind('themeStore.textColor');
+  transition: background 0.15s;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctx-item:hover {
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.08)" : "rgba(59,130,246,0.1)"');
+}
+
+.ctx-item.danger {
+  color: #f87171;
+}
+
+.ctx-item.danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.ctx-item.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.ctx-divider {
+  height: 1px;
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"');
+  margin: 3px 4px;
 }
 </style>

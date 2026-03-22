@@ -5,6 +5,9 @@
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
+import { useThemeStore } from '@/stores/theme'
+
+const themeStore = useThemeStore()
 
 type AMapWeatherLive = {
   weather: string
@@ -51,17 +54,24 @@ async function fetchWeather() {
   if (!city) return
 
   const url = `https://restapi.amap.com/v3/weather/weatherInfo?key=${encodeURIComponent(amapKey)}&city=${encodeURIComponent(city)}&extensions=base`
-  const res = await fetch(url)
-  if (!res.ok) return
+  
+  try {
+    const res = await fetch(url)
+    if (!res.ok) return
 
-  const data = (await res.json()) as { lives?: Array<Record<string, string>> }
-  const live = data.lives?.[0]
-  if (!live) return
+    const data = (await res.json()) as { lives?: Array<Record<string, string>>, status?: string, info?: string }
+    if (data.status !== '1') return
+    
+    const live = data.lives?.[0]
+    if (!live) return
 
-  weather.value = {
-    weather: String(live.weather ?? ''),
-    temperature: String(live.temperature ?? ''),
-    location: String(live.city || live.province || city || fallbackCity)
+    weather.value = {
+      weather: String(live.weather ?? ''),
+      temperature: String(live.temperature ?? ''),
+      location: String(live.city || live.province || city || fallbackCity)
+    }
+  } catch (error) {
+    console.error('[Weather] 获取天气失败:', error)
   }
 }
 
@@ -88,7 +98,13 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.weather { display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.weather { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 4px; 
+  align-items: flex-start;
+  color: v-bind('themeStore.textColor');
+}
 
 .weather-text {
   font-size: 15px;
@@ -103,8 +119,9 @@ onUnmounted(() => {
 .weather-location {
   font-size: 13px;
   letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.85);
+  color: v-bind('themeStore.textColor');
   font-weight: 500;
+  opacity: 0.85;
 }
 
 .weather-temp { font-size: 48px; line-height: 1; font-weight: 600; }

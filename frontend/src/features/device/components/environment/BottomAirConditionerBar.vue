@@ -4,7 +4,7 @@
   触发：单击空调设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { computed } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
 import { useDevicesStore } from '@/features/device/store/devices.store'
 
@@ -22,7 +22,7 @@ const devicesStore = useDevicesStore()
 // 空调模式
 const acModes = ['制冷', '制热', '除湿']
 const currentModeIndex = computed({
-  get: () => props.device?.acModeIndex ?? null,
+  get: () => (props.device as any)?.acModeIndex ?? null,
   set: (value: number | null) => {
     if (props.device) {
       devicesStore.setAcMode(props.device.id, value)
@@ -32,7 +32,7 @@ const currentModeIndex = computed({
 
 // 使用计算属性从设备获取温度
 const localTargetTemp = computed({
-  get: () => props.device?.targetTemp ?? 26,
+  get: () => (props.device as any)?.targetTemp ?? 26,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setTargetTemp(props.device.id, value)
@@ -164,9 +164,9 @@ const toggleAcMode = () => {
   padding: 12px 16px;
   background: linear-gradient(
     135deg,
-    rgba(30, 40, 60, 0.95) 0%,
-    rgba(40, 55, 80, 0.95) 50%,
-    rgba(50, 70, 100, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -200,7 +200,7 @@ const toggleAcMode = () => {
 }
 
 .control-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   border-radius: 16px;
   color: white;
@@ -233,7 +233,7 @@ const toggleAcMode = () => {
 }
 
 .mode-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   color: white;
 }
 

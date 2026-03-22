@@ -24,6 +24,7 @@ const emit = defineEmits<{
 const powerDetailTab = ref<'week' | 'month' | 'year'>('week')
 const selectedDate = ref(new Date())
 const barSelectedIndex = ref(-1)
+const isChartReady = ref(false)
 
 // 根据日期生成固定的随机数据
 const getSeededData = (seed: number, count: number, max: number) => {
@@ -251,6 +252,21 @@ watch(powerDetailTab, () => {
   selectedDate.value = new Date()
 })
 
+// 监听弹窗显示状态，延迟显示图表避免闪烁
+watch(() => props.visible, (newVal) => {
+  if (newVal) {
+    isChartReady.value = false
+    // 使用 requestAnimationFrame 确保 DOM 更新后再显示图表
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        isChartReady.value = true
+      }, 50)
+    })
+  } else {
+    isChartReady.value = false
+  }
+})
+
 const selectedBarData = computed(() => {
   let yData: number[] = []
   let xData: string[] = []
@@ -351,7 +367,8 @@ const adjustDate = (direction: number) => {
         </div>
         
         <div class="power-chart-area">
-          <v-chart :option="switchChartOption" autoresize class="switch-chart" />
+          <v-chart v-if="isChartReady" :option="switchChartOption" autoresize class="switch-chart" />
+          <div v-else class="chart-loading">加载中...</div>
         </div>
         
         <div class="power-tab-bar">
@@ -375,7 +392,8 @@ const adjustDate = (direction: number) => {
         </div>
         
         <div class="power-bar-chart-area">
-          <v-chart :option="powerBarChartOption" autoresize class="power-bar-chart-echart" @click="onBarChartClick" />
+          <v-chart v-if="isChartReady" :option="powerBarChartOption" autoresize class="power-bar-chart-echart" @click="onBarChartClick" />
+          <div v-else class="chart-loading">加载中...</div>
         </div>
       </div>
     </div>
@@ -396,11 +414,9 @@ const adjustDate = (direction: number) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -452,6 +468,16 @@ const adjustDate = (direction: number) => {
 
 .switch-chart { width: 100%; height: 100%; }
 
+.chart-loading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
 .power-tab-bar {
   display: flex;
   justify-content: center;
@@ -480,8 +506,8 @@ const adjustDate = (direction: number) => {
 .power-tab.active {
   color: white;
   font-weight: 600;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+  background: var(--dialog-btn-active-bg-1);
+  box-shadow: 0 2px 10px var(--dialog-btn-active-shadow);
 }
 
 .power-date-range {
@@ -511,7 +537,7 @@ const adjustDate = (direction: number) => {
 
 .date-arrow:hover {
   color: white;
-  background: rgba(79, 172, 254, 0.3);
+  background: var(--dialog-btn-active-light-bg-1);
 }
 
 .date-arrow:active {

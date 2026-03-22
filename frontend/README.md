@@ -1,143 +1,149 @@
-# 智能家居控制系统
+# 🏠 智能家居控制台 · 前端
 
-一个基于 Vue 3 + TypeScript 的现代化智能家居控制面板，提供直观的设备管理和控制界面。
+**基于 Vue 3 + TypeScript 构建的现代化智能家居可视化控制界面**
 
-> 🎉 **最新更新**: 项目已完成代码优化，删除了15个未使用的文件和2000+行冗余代码，代码更加精简高效！
+[![Vue](https://img.shields.io/badge/Vue-3.5-4FC08D?style=flat-square&logo=vue.js&logoColor=white)](https://vuejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?style=flat-square&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Pinia](https://img.shields.io/badge/Pinia-3.0-FFD859?style=flat-square&logo=pinia&logoColor=black)](https://pinia.vuejs.org/)
+[![Element Plus](https://img.shields.io/badge/Element_Plus-2.13-409EFF?style=flat-square&logo=element&logoColor=white)](https://element-plus.org/)
+
+---
 
 ## ✨ 功能特性
 
-- 🏠 **房间管理**: 支持多房间切换和管理
-- 🔌 **设备控制**: 支持多种智能设备的控制
-- ⏰ **定时功能**: 定时开关、倒计时功能
-- 🎨 **精美UI**: 毛玻璃效果、流畅动画
-- 📱 **响应式设计**: 适配不同屏幕尺寸
-- 🌙 **深色主题**: 星空背景，视觉舒适
+| 功能 | 描述 |
+|------|------|
+| 🏘️ 多房间管理 | 按房间分组展示设备，标签页快速切换 |
+| 📱 40+ 设备类型 | 灯光、空调、厨房、卫浴、清洁、娱乐、安防、网络 |
+| ⚡ 双层控制 | 底部快捷操作栏 + 详细控制弹窗 |
+| ⏱️ 定时功能 | 设备定时器与倒计时 |
+| 🎬 场景自动化 | 一键触发多设备联动 |
+| 🗺️ 平面图视图 | 可视化房间平面图，直观展示设备位置 |
+| 🔄 实时同步 | Socket.IO 推送，状态毫秒级更新 |
+| 🌙 主题切换 | 深色 / 浅色主题，星空粒子背景 |
+| 💾 数据持久化 | 设备状态与后端 MySQL 实时同步 |
+
+---
+
+## 🛠️ 技术栈
+
+```
+Vue 3 (Composition API)
+├── TypeScript 5.9          类型安全
+├── Vite 7.2                极速构建
+├── Pinia 3.0               状态管理
+├── Vue Router 4.6          路由管理
+├── Element Plus 2.13       UI 组件库
+├── ECharts 6.0             数据可视化
+├── Socket.IO Client 4.8    实时通信
+└── Axios 1.13              HTTP 请求
+```
+
+---
+
+## 📁 项目结构
+
+```
+src/
+├── 📄 App.vue                    根组件（顶栏、路由视图）
+├── 📄 main.ts                    应用入口
+│
+├── 📂 features/
+│   ├── 📂 device/                设备功能模块
+│   │   ├── 📂 components/        设备组件（按分类组织）
+│   │   │   ├── 🚿 bathroom/      卫浴（马桶、热水器、浴霸）
+│   │   │   ├── 🧹 cleaners/      清洁（洗衣机、烘干机、扫地机）
+│   │   │   ├── 🎮 entertainment/ 娱乐（电视、音响、投影仪）
+│   │   │   ├── 🌡️ environment/   环境（空调、净化器、风扇、加湿器等）
+│   │   │   ├── 🍳 kitchen/       厨房（电饭锅、油烟机、空气炸锅）
+│   │   │   ├── 💡 lights/        灯光
+│   │   │   ├── 🌐 network/       网络设备
+│   │   │   ├── 👤 personal/      个人设备
+│   │   │   ├── 🔒 security/      安防
+│   │   │   ├── 🔌 switches/      开关插座
+│   │   │   └── 🔧 common/        通用组件（定时器、电量详情）
+│   │   ├── 📂 composables/       设备控制逻辑复用
+│   │   │   ├── 📄 useBottomBar.ts
+│   │   │   ├── 📄 useDeviceControl.ts
+│   │   │   ├── 📄 useRobotControl.ts
+│   │   │   └── 📄 useSliderControl.ts
+│   │   ├── 📂 store/             设备 Pinia Store
+│   │   └── 📂 types/             TypeScript 类型定义
+│   └── 📂 layout/                布局模块（导航栏、标签页）
+│
+├── 📂 views/
+│   ├── 📄 StandardMode.vue       主控制页面
+│   ├── 📄 FloorPlan.vue          平面图视图
+│   └── 📄 AddDevice.vue          添加设备页面
+│
+├── 📂 services/
+│   ├── 📄 api.ts                 REST API 封装
+│   └── 📄 socket.ts              Socket.IO 连接管理
+│
+├── 📂 composables/
+│   └── 📄 useBackendSync.ts      后端数据同步逻辑
+│
+├── 📂 stores/
+│   ├── 📄 theme.ts               主题 Store
+│   └── 📄 layout.ts              布局 Store
+│
+├── 📂 shared/                    公共组件（时钟、天气、导航）
+├── 📂 constants/                 设备类型、配置常量
+├── 📂 router/                    路由配置
+└── 📂 plugins/                   插件（Element Plus 等）
+```
+
+---
 
 ## 🚀 快速开始
 
 ### 环境要求
 
-- Node.js 20.19.0+ 或 22.12.0+
-- npm 或 pnpm
+> Node.js `^20.19.0` 或 `>=22.12.0`
 
-### 安装依赖
+### 安装 & 启动
 
-```sh
+```bash
+# 安装依赖
+cd frontend
 npm install
-```
 
-### 开发模式
-
-```sh
+# 开发模式
 npm run dev
 ```
 
-### 类型检查
+访问 [http://localhost:5173](http://localhost:5173)
 
-```sh
-npm run type-check
+### 环境配置
+
+编辑 `.env` 文件：
+
+```env
+VITE_API_BASE_URL=http://localhost:3000
+VITE_SOCKET_URL=http://localhost:3000
 ```
 
-### 生产构建
+### 所有命令
 
-```sh
-npm run build
+| 命令 | 说明 |
+|------|------|
+| `npm run dev` | 启动开发服务器 |
+| `npm run build` | 生产构建 |
+| `npm run preview` | 预览构建产物 |
+| `npm run type-check` | TypeScript 类型检查 |
+| `npm run test` | 运行单元测试（单次） |
+| `npm run test:watch` | 监听模式运行测试 |
+| `npm run test:ui` | 可视化测试界面 |
+
+---
+
+## 🔗 与后端通信
+
+```
+启动时  ──HTTP GET──▶  拉取房间 & 设备列表
+操作时  ──HTTP──▶      增删改设备 / 触发场景
+实时    ◀──Socket.IO── device:statusChanged 事件推送
 ```
 
-### 预览构建
-
-```sh
-npm run preview
-```
-
-## 📦 支持的设备类型
-
-### 灯光设备
-- 台灯（亮度、色温、情景模式）
-- 吸顶灯
-
-### 清洁电器
-- 扫地机器人（清扫模式、吸力/水量控制）
-- 洗衣机/烘干机（多种清洁模式）
-- 晾衣架（升降、照明、烘干、消毒）
-
-### 环境电器
-- 加湿器（档位调节、电源控制）
-
-### 其他设备
-- 插座/插排
-- 开关
-- 路由器/网关
-- 厨房电器（电热水壶等）
-
-## 🎮 使用说明
-
-### 设备操作
-- **单击卡片**: 显示底部快捷控制栏
-- **长按卡片**: 打开详细控制对话框
-- **右键卡片**: 删除设备
-
-### 房间管理
-- 点击导航栏的 `+` 按钮添加房间
-- 右键房间标签删除房间
-- 点击房间标签切换当前房间
-
-### 添加设备
-1. 点击右上角模式切换按钮
-2. 选择"添加设备"
-3. 填写设备信息并选择所属房间
-4. 点击确定完成添加
-
-## 🛠️ 技术栈
-
-- **框架**: Vue 3.5+ (Composition API)
-- **语言**: TypeScript 5.9
-- **状态管理**: Pinia 3.0+
-- **路由**: Vue Router 4.6+
-- **UI组件**: Element Plus 2.13+
-- **图表**: ECharts 6.0+ / Vue-ECharts 8.0+
-- **构建工具**: Vite 7.2+
-- **开发工具**: Vue DevTools
-
-## 📁 项目结构
-
-详见 [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
-
-## 🔧 开发工具推荐
-
-### IDE
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar)
-
-### 浏览器扩展
-- Chrome/Edge: [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-- Firefox: [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-
-## 🔧 代码优化记录
-
-### 最近优化（2026-01-29）
-
-项目已完成全面的代码审查和优化：
-
-**删除的未使用文件（15个）：**
-- 6个未使用的对话框组件（空调、卫浴、厨房、个护、安防、影音）
-- 2个未使用的共享组件（BrightnessControl、SvgIcon）
-- 1个未使用的底部控制栏（BottomPowerBar）
-- 5个后端空文件夹标记文件
-- 1个临时文件
-
-**代码质量改进：**
-- ✅ 修复了重复的导出语句
-- ✅ 优化了 composables 结构
-- ✅ 修正了导入路径错误
-- ✅ 通过 TypeScript 类型检查
-- ✅ 保持所有功能和样式完整
-
-**优化成果：**
-- 删除约 2000+ 行冗余代码
-- 项目结构更加清晰
-- 维护成本降低
-- 构建速度提升
-
-## 📄 许可证
-
-MIT License
+后端需在 `http://localhost:3000` 运行，详见 [后端文档](../backend/README.md)。

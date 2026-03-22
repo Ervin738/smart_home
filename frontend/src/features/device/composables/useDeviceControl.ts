@@ -1,35 +1,22 @@
 /**
  * 设备控制相关的组合式函数
+ * 
+ * 功能：提供特定设备类型的控制逻辑和状态管理
+ * 
+ * 使用场景：
+ * - 设备对话框组件（ClothesRackDialog 等）
+ * - 需要特定设备控制逻辑的组件
+ * 
+ * 包含的控制器：
+ * - useClothesRackControl: 晾衣架的照明、烘干、风干、消毒等控制
+ * 
+ * @example
+ * ```typescript
+ * // 晾衣架控制
+ * const { lighting, drying, airDry, sterilize, moving, reset } = useClothesRackControl()
+ * ```
  */
 import { ref } from 'vue'
-
-/**
- * 扫地机器人吸力和水量控制
- */
-export function useRobotControl() {
-  const suctionLevel = ref(0) // 0-2: 一档、二档、三档
-  const waterLevel = ref(0) // 0-2: 少、中、多
-
-  const suctionLevels = ['一档', '二档', '三档']
-  const waterLevels = ['少', '中', '多']
-
-  const adjustSuction = (delta: number) => {
-    suctionLevel.value = Math.max(0, Math.min(2, suctionLevel.value + delta))
-  }
-
-  const adjustWater = (delta: number) => {
-    waterLevel.value = Math.max(0, Math.min(2, waterLevel.value + delta))
-  }
-
-  return {
-    suctionLevel,
-    waterLevel,
-    suctionLevels,
-    waterLevels,
-    adjustSuction,
-    adjustWater
-  }
-}
 
 /**
  * 晾衣架控制

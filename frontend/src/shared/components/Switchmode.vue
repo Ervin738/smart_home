@@ -1,11 +1,12 @@
 <!--
   模式切换组件
-  功能：在标准模式和添加设备模式之间切换
+  功能：在标准模式和添加设备模式之间切换，以及主题切换
   位置：页面右上角
 -->
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useThemeStore } from '@/stores/theme'
 
 type ModeOption = {
   label: string
@@ -24,12 +25,13 @@ const emit = defineEmits<{
 const defaultModes: ModeOption[] = [
   { label: '添加设备', to: '/equipment' },
   { label: '标准模式', to: '/' },
-  { label: '音乐模式', to: '/music' }
+  { label: '平面图模式', to: '/floor-plan' }
 ]
 
 const options = props.modes?.length ? props.modes : defaultModes
 const route = useRoute()
 const router = useRouter()
+const themeStore = useThemeStore()
 
 const getCurrentMode = (): ModeOption => {
   const current = options.find(o => o.to === route.path)
@@ -49,12 +51,24 @@ function togglePanel() {
 }
 
 function handleSelect(option: ModeOption) {
+  // 如果点击的是当前已激活的选项，直接关闭面板
+  if (activeOption.value.label === option.label && activeOption.value.to === option.to) {
+    showPanel.value = false
+    return
+  }
+  
   activeOption.value = option
   showPanel.value = false
   emit('select', option)
-  if (option.to) {
+  
+  // 只有当目标路径与当前路径不同时才进行路由跳转
+  if (option.to && route.path !== option.to) {
     router.push(option.to)
   }
+}
+
+function selectTheme(themeName: string) {
+  themeStore.setTheme(themeName)
 }
 
 function handleClickOutside(event: MouseEvent) {
@@ -90,6 +104,29 @@ onUnmounted(() => {
           <span class="option-text">{{ option.label }}</span>
           <div v-if="activeOption.label === option.label" class="active-bg"></div>
         </div>
+        
+        <!-- 主题选择分隔线 -->
+        <div class="theme-divider"></div>
+        
+        <!-- 主题选择 -->
+        <div class="theme-section">
+          <div class="theme-label">主题</div>
+          <div class="theme-buttons">
+            <button
+              v-for="(theme, key) in themeStore.themes"
+              :key="key"
+              class="theme-button"
+              :class="{ active: themeStore.currentThemeName === key }"
+              @click="selectTheme(key)"
+              :title="theme.displayName"
+            >
+              <div 
+                class="theme-color-preview" 
+                :style="{ background: `linear-gradient(135deg, ${theme.colors.gradientStops.join(', ')})` }"
+              ></div>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -99,25 +136,46 @@ onUnmounted(() => {
 .mode-switcher { position: fixed; top: 24px; right: 24px; z-index: 100; }
 
 .mode-container {
-  background: linear-gradient(
-    135deg,
-    rgba(26, 42, 78, 0.45) 0%,
-    rgba(42, 58, 90, 0.4) 30%,
-    rgba(58, 90, 122, 0.45) 70%,
-    rgba(42, 58, 90, 0.4) 100%
-  );
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
   backdrop-filter: blur(30px) saturate(120%);
   -webkit-backdrop-filter: blur(30px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.25);
   box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.4),
-    0 2px 8px rgba(10, 14, 26, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.05);
   border-radius: 26px;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   position: relative;
+}
+
+.mode-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 35%,
+    transparent 65%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.mode-container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(255, 255, 255, 0.03) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 .mode-container.expanded {
@@ -144,12 +202,12 @@ onUnmounted(() => {
 }
 
 .button-text {
-  color: white;
+  color: v-bind('themeStore.textColor');
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-align: center;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
 .mode-options {
@@ -191,17 +249,17 @@ onUnmounted(() => {
 .option-text {
   position: relative;
   z-index: 2;
-  color: white;
+  color: v-bind('themeStore.textColor');
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.05em;
   text-align: center;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
-.option-item:hover .option-text { color: white; }
-.option-item.active .option-text { color: white; transform: scale(1.02); }
+.option-item:hover .option-text { color: v-bind('themeStore.textColor'); }
+.option-item.active .option-text { color: v-bind('themeStore.textColor'); transform: scale(1.02); }
 
 .active-bg {
   position: absolute;
@@ -209,18 +267,13 @@ onUnmounted(() => {
   left: 8px;
   right: 8px;
   bottom: 4px;
-  background: linear-gradient(
-    135deg,
-    rgba(58, 106, 154, 0.25) 0%,
-    rgba(42, 58, 90, 0.18) 50%,
-    rgba(58, 106, 154, 0.22) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.18) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 16px;
   z-index: 0;
   animation: liquidDrop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 
-    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
     0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -240,5 +293,55 @@ onUnmounted(() => {
 
 @media (max-width: 600px) {
   .mode-switcher { top: 16px; right: 16px; }
+}
+
+.theme-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 8px 0;
+}
+
+.theme-section {
+  padding: 12px 16px;
+}
+
+.theme-label {
+  color: v-bind('themeStore.textColorSecondary');
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.theme-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.theme-button {
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.theme-button:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+.theme-button.active {
+  border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.theme-color-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
 }
 </style>

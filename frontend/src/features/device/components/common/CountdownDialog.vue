@@ -131,17 +131,15 @@ const stopCountdownDrag = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 3000;
 }
 
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;

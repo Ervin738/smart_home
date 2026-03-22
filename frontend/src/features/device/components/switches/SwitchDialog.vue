@@ -75,11 +75,9 @@ const emit = defineEmits<{
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -163,10 +161,10 @@ const emit = defineEmits<{
 }
 
 .control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
+  border: none;
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: none;
 }
 
 .btn-icon {

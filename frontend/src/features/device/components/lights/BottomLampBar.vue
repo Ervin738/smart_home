@@ -22,19 +22,19 @@ const localBrightness = ref(0)
 // 当设备改变时，恢复该设备的亮度状态
 watch(() => props.device?.id, (newId) => {
   if (newId && props.device) {
-    localBrightness.value = props.device.brightness ?? 0
+    localBrightness.value = (props.device as any).brightness ?? 0
   }
 })
 
 // 初始化时恢复状态
 watch(() => props.visible, (visible) => {
   if (visible && props.device) {
-    localBrightness.value = props.device.brightness ?? 0
+    localBrightness.value = (props.device as any).brightness ?? 0
   }
 })
 
 // 当设备亮度改变时同步
-watch(() => props.device?.brightness, (newBrightness) => {
+watch(() => (props.device as any)?.brightness, (newBrightness) => {
   if (newBrightness !== undefined) {
     localBrightness.value = newBrightness
   }
@@ -120,9 +120,9 @@ const onSliderChange = (value: number) => {
   padding: 12px 16px;
   background: linear-gradient(
     135deg,
-    rgba(30, 40, 60, 0.95) 0%,
-    rgba(40, 55, 80, 0.95) 50%,
-    rgba(50, 70, 100, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -156,7 +156,7 @@ const onSliderChange = (value: number) => {
 }
 
 .control-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   border-radius: 16px;
   color: white;

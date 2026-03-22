@@ -25,7 +25,7 @@ const devicesStore = useDevicesStore()
 const targetTemp = ref(25)
 
 // 监听设备对象的目标温度变化，实时同步
-watch(() => props.device?.targetTemp, (newTemp) => {
+watch(() => (props.device as any)?.targetTemp, (newTemp) => {
   if (newTemp !== undefined) {
     targetTemp.value = newTemp
   }
@@ -34,14 +34,14 @@ watch(() => props.device?.targetTemp, (newTemp) => {
 // 当设备改变时，恢复该设备的温度状态
 watch(() => props.device?.id, (newId) => {
   if (newId && props.device) {
-    targetTemp.value = props.device.targetTemp ?? 25
+    targetTemp.value = (props.device as any).targetTemp ?? 25
   }
 })
 
 // 初始化时恢复状态
 watch(() => props.visible, (visible) => {
   if (visible && props.device) {
-    targetTemp.value = props.device.targetTemp ?? 25
+    targetTemp.value = (props.device as any).targetTemp ?? 25
   }
 })
 
@@ -56,16 +56,17 @@ const showDelayTimePicker = ref(false)
 // 监听设备变化，同步延时关闭状态
 watch(() => props.device, (device) => {
   if (device) {
+    const d = device as any
     // 如果设备关闭，自动禁用延时关闭
-    if (device.status === 'offline' && device.delayShutdownEnabled) {
+    if (device.status === 'offline' && d.delayShutdownEnabled) {
       devicesStore.setDelayShutdown(device.id, false)
       delayShutdownEnabled.value = false
     } else {
-      delayShutdownEnabled.value = device.delayShutdownEnabled || false
+      delayShutdownEnabled.value = d.delayShutdownEnabled || false
     }
     // 根据延时关闭时长设置索引
-    if (device.delayShutdownDuration) {
-      const index = delayTimeMinutes.indexOf(device.delayShutdownDuration)
+    if (d.delayShutdownDuration) {
+      const index = delayTimeMinutes.indexOf(d.delayShutdownDuration)
       if (index !== -1) {
         delayTimeIndex.value = index
       }
@@ -273,11 +274,9 @@ const selectDelayTime = (index: number) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -368,10 +367,8 @@ const selectDelayTime = (index: number) => {
 }
 
 .heater-power-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .heater-power-icon {
@@ -610,11 +607,9 @@ const selectDelayTime = (index: number) => {
 .time-picker-dialog {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -660,9 +655,7 @@ const selectDelayTime = (index: number) => {
 
 .time-option.active {
   background: linear-gradient(135deg, #ff9a3c 0%, #ff7a1f 100%);
-  border-color: rgba(255, 154, 60, 0.4);
   color: white;
-  box-shadow: 0 4px 20px rgba(255, 154, 60, 0.4);
 }
 
 .time-option.active:hover {

@@ -40,19 +40,15 @@ export const SWITCH_TYPES: DeviceOption[] = [
 export const CLEANER_TYPES: DeviceOption[] = [
   { value: 'washing-machine', label: '洗衣机' },
   { value: 'dryer', label: '烘干机' },
-  { value: 'robot-vacuum', label: '扫地机器人' },
-  { value: 'clothes-rack', label: '晾衣架' }
+  { value: 'clothes-rack', label: '晾衣架' },
+  { value: 'robot-vacuum', label: '扫地机器人' }
 ]
 
-// 安防类型选项
+// 安防类型选项（删除了猫眼门铃、保险箱、报警器、对讲机）
 export const SECURITY_TYPES: DeviceOption[] = [
   { value: 'camera', label: '摄像机' },
-  { value: 'doorbell', label: '猫眼门铃' },
   { value: 'door-lock', label: '门锁' },
-  { value: 'safe', label: '保险箱' },
-  { value: 'alarm', label: '报警器' },
-  { value: 'smart-door', label: '智能门' },
-  { value: 'intercom', label: '对讲机' }
+  { value: 'smart-door', label: '智能门' }
 ]
 
 // 环境电器类型选项
@@ -69,39 +65,26 @@ export const ENVIRONMENT_TYPES: DeviceOption[] = [
 // 个护与起居类型选项
 export const PERSONAL_TYPES: DeviceOption[] = [
   { value: 'smart-bed', label: '智能床' },
-  { value: 'smart-mattress', label: '智能床垫' },
   { value: 'smart-pillow', label: '智能枕头' },
-  { value: 'smart-mirror', label: '智能镜' },
   { value: 'electric-blanket', label: '电热毯' },
-  { value: 'window-opener', label: '开窗器' },
-  { value: 'curtain-motor', label: '窗帘电机' },
-  { value: 'electronic-valve', label: '电子阀门' },
-  { value: 'sofa', label: '沙发' }
+  { value: 'window-opener', label: '开窗器' }
 ]
 
 // 卫浴类型选项
 export const BATHROOM_TYPES: DeviceOption[] = [
   { value: 'toilet', label: '马桶' },
-  { value: 'bath-heater', label: '浴霸' },
-  { value: 'faucet', label: '水龙头' },
+  { value: 'yuba', label: '浴霸' },
   { value: 'water-heater', label: '热水器' }
 ]
 
 // 厨房电器类型选项
 export const KITCHEN_TYPES: DeviceOption[] = [
-  { value: 'cooking-machine', label: '炒菜机' },
   { value: 'rice-cooker', label: '电饭煲' },
   { value: 'electric-kettle', label: '电热水壶' },
   { value: 'water-dispenser', label: '饮水机' },
-  { value: 'water-purifier', label: '净水机' },
   { value: 'range-hood', label: '抽油烟机' },
   { value: 'induction-cooker', label: '电磁炉' },
-  { value: 'dishwasher', label: '洗碗机' },
-  { value: 'juicer', label: '榨汁机' },
-  { value: 'air-fryer', label: '空气炸锅' },
-  { value: 'steam-oven', label: '蒸烤箱' },
-  { value: 'sterilizer', label: '消毒柜' },
-  { value: 'water-heater-kitchen', label: '热水器' }
+  { value: 'air-fryer', label: '空气炸锅' }
 ]
 
 // 路由网关类型选项
@@ -114,10 +97,8 @@ export const NETWORK_TYPES: DeviceOption[] = [
 // 影音娱乐类型选项
 export const ENTERTAINMENT_TYPES: DeviceOption[] = [
   { value: 'tv', label: '电视' },
-  { value: 'tv-box', label: '电视盒子' },
   { value: 'speaker', label: '音箱' },
   { value: 'projector', label: '投影仪' },
-  { value: 'robot', label: '机器人' },
   { value: 'clock', label: '时钟' }
 ]
 

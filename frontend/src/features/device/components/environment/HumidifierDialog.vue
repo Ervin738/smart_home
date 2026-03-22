@@ -4,8 +4,9 @@
   触发：长按加湿器设备卡片
 -->
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -18,7 +19,12 @@ const emit = defineEmits<{
   (e: 'update:level', level: number): void
 }>()
 
-const humidifierLevel = ref(1) // 0: 1档, 1: 2档, 2: 恒湿
+const store = useDevicesStore()
+
+const humidifierLevel = computed({
+  get: () => (props.device as any)?.humidifierLevel ?? 1,
+  set: (level: number) => { if (props.device) store.setDeviceExtra(props.device.id, { humidifierLevel: level }) }
+})
 
 const handleLevelChange = (level: number) => {
   if (!props.device || props.device.status === 'offline') return
@@ -60,8 +66,8 @@ const handleLevelChange = (level: number) => {
           <div class="humidifier-level-section">
             <div 
               class="humidifier-level-btn"
-              :class="{ active: humidifierLevel === 0, disabled: device.status === 'offline' }"
-              @click="handleLevelChange(0)"
+              :class="{ active: humidifierLevel === 1, disabled: device.status === 'offline' }"
+              @click="handleLevelChange(1)"
             >
               <div class="humidifier-level-icon">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -73,8 +79,8 @@ const handleLevelChange = (level: number) => {
             
             <div 
               class="humidifier-level-btn"
-              :class="{ active: humidifierLevel === 1, disabled: device.status === 'offline' }"
-              @click="handleLevelChange(1)"
+              :class="{ active: humidifierLevel === 2, disabled: device.status === 'offline' }"
+              @click="handleLevelChange(2)"
             >
               <div class="humidifier-level-icon">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -87,8 +93,8 @@ const handleLevelChange = (level: number) => {
             
             <div 
               class="humidifier-level-btn"
-              :class="{ active: humidifierLevel === 2, disabled: device.status === 'offline' }"
-              @click="handleLevelChange(2)"
+              :class="{ active: humidifierLevel === 3, disabled: device.status === 'offline' }"
+              @click="handleLevelChange(3)"
             >
               <div class="humidifier-level-icon">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -118,11 +124,9 @@ const handleLevelChange = (level: number) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -193,9 +197,9 @@ const handleLevelChange = (level: number) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
-  padding: 18px 8px;
+  padding: 10px 8px;
   background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
   border: 1px solid rgba(120, 170, 220, 0.3);
   border-radius: 16px;
@@ -213,10 +217,8 @@ const handleLevelChange = (level: number) => {
 }
 
 .humidifier-power-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .humidifier-power-icon {
@@ -241,8 +243,8 @@ const handleLevelChange = (level: number) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 18px 8px;
+  gap: 6px;
+  padding: 10px 8px;
   background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
   border: 1px solid rgba(120, 170, 220, 0.3);
   border-radius: 16px;
@@ -264,9 +266,7 @@ const handleLevelChange = (level: number) => {
 }
 
 .humidifier-level-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
 }
 
@@ -292,8 +292,8 @@ const handleLevelChange = (level: number) => {
 }
 
 .humidifier-level-label {
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   text-align: center;
 }
 

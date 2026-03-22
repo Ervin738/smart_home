@@ -25,7 +25,7 @@ const devicesStore = useDevicesStore()
 // 风扇模式
 const fanModes = ['直吹风', '自然风']
 const currentModeIndex = computed({
-  get: () => props.device?.fanModeIndex ?? 0,
+  get: () => (props.device as any)?.fanModeIndex ?? 0,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setFanMode(props.device.id, value)
@@ -33,49 +33,47 @@ const currentModeIndex = computed({
   }
 })
 
-// 风速等级 (1-4档)
-const speedLevel = computed({
-  get: () => props.device?.speedLevel ?? 1,
+// 直吹风档位 (1-4)，独立存储
+const directSpeed = computed({
+  get: () => (props.device as any)?.fanDirectSpeed ?? 1,
   set: (value: number) => {
-    if (props.device) {
-      devicesStore.setSpeedLevel(props.device.id, value)
-    }
+    if (props.device) devicesStore.setDeviceExtra(props.device.id, { fanDirectSpeed: value })
   }
 })
 
-// 临时滑动值，用于实时跟踪滑块位置
-const tempSpeedLevel = ref(speedLevel.value)
-
-// 计算圆形指示器的位置
-// 轨道有效宽度 = 100% - 右侧padding(56px) - 指示器宽度(44px)
-// 指示器应该在 0 到 (100% - 100px) 之间移动
-const indicatorLeft = computed(() => {
-  const progress = (tempSpeedLevel.value - 1) / 3 // 0 到 1
-  const maxMove = 'calc(100% - 100px)' // 最大可移动距离
-  return `calc(${progress * 100}% * (100% - 100px) / 100%)`
+// 自然风档位 (1-4)，独立存储
+const natureSpeed = computed({
+  get: () => (props.device as any)?.fanNatureSpeed ?? 1,
+  set: (value: number) => {
+    if (props.device) devicesStore.setDeviceExtra(props.device.id, { fanNatureSpeed: value })
+  }
 })
 
-// 监听设备风速变化，同步临时值
-watch(() => props.device?.speedLevel, (newValue) => {
-  if (newValue !== undefined) {
-    tempSpeedLevel.value = newValue
-  }
+// 直吹风滑块临时值（用于拖动时实时显示）
+const tempDirectSpeed = ref(directSpeed.value)
+watch(() => (props.device as any)?.fanDirectSpeed, (v) => {
+  if (v !== undefined) tempDirectSpeed.value = v
 }, { immediate: true })
 
-// 滑块拖动时更新临时值
+// 滑块事件处理
 const onSpeedInput = (event: Event) => {
   const target = event.target as HTMLInputElement
-  const rawValue = Number(target.value)
-  // 四舍五入到最近的整数档位
-  tempSpeedLevel.value = Math.round(rawValue)
+  tempDirectSpeed.value = Number(target.value)
 }
 
-// 滑块释放时更新实际值
 const onSpeedChange = () => {
-  const roundedValue = Math.round(tempSpeedLevel.value)
-  tempSpeedLevel.value = roundedValue
-  speedLevel.value = roundedValue
+  directSpeed.value = Math.round(tempDirectSpeed.value)
+  tempDirectSpeed.value = directSpeed.value
 }
+
+// 兼容旧字段（BottomFanBar 仍用 speedLevel）
+const speedLevel = computed({
+  get: () => currentModeIndex.value === 0 ? directSpeed.value : natureSpeed.value,
+  set: (value: number) => {
+    if (currentModeIndex.value === 0) directSpeed.value = value
+    else natureSpeed.value = value
+  }
+})
 
 // 切换风扇模式
 const toggleFanMode = () => {
@@ -85,7 +83,7 @@ const toggleFanMode = () => {
 // 扫风开关
 const swingEnabled = computed({
   get: () => {
-    const value = props.device?.swingEnabled ?? false
+    const value = (props.device as any)?.swingEnabled ?? false
     console.log('swingEnabled get:', value, 'device:', props.device)
     return value
   },
@@ -109,7 +107,7 @@ const adjustSwingRight = () => {
 }
 
 // 扫风角度
-const swingAngle = computed(() => props.device?.swingAngle ?? 140)
+const swingAngle = computed(() => (props.device as any)?.swingAngle ?? 140)
 
 // 调节扫风角度
 const showAngleSelector = ref(false)
@@ -135,12 +133,13 @@ const showDelayTimePicker = ref(false)
 // 监听设备变化，同步延时关闭状态
 watch(() => props.device, (device) => {
   if (device) {
-    if (device.status === 'offline' && device.delayShutdownEnabled) {
+    const d = device as any
+    if (device.status === 'offline' && d.delayShutdownEnabled) {
       devicesStore.setDelayShutdown(device.id, false)
     }
-    delayShutdownEnabled.value = device.delayShutdownEnabled || false
-    if (device.delayShutdownDuration) {
-      const index = delayTimeMinutes.indexOf(device.delayShutdownDuration)
+    delayShutdownEnabled.value = d.delayShutdownEnabled || false
+    if (d.delayShutdownDuration) {
+      const index = delayTimeMinutes.indexOf(d.delayShutdownDuration)
       if (index !== -1) {
         delayTimeIndex.value = index
       }
@@ -280,22 +279,22 @@ const selectDelayTime = (index: number) => {
               <div class="speed-label-header">
                 <span class="speed-label-text">无级调节</span>
                 <span class="speed-label-divider">|</span>
-                <span class="speed-label-value">{{ Math.round(tempSpeedLevel) }}</span>
+                <span class="speed-label-value">{{ Math.round(tempDirectSpeed) }}</span>
               </div>
               <div class="speed-slider-wrapper">
                 <div class="slider-track">
                   <div 
                     class="speed-indicator" 
-                    :style="{ left: `calc(((${tempSpeedLevel} - 1) / 3) * (100% - 44px))` }"
+                    :style="{ left: `calc(((${tempDirectSpeed} - 1) / 3) * (100% - 44px))` }"
                   >
-                    {{ Math.round(tempSpeedLevel) }}
+                    {{ Math.round(tempDirectSpeed) }}
                   </div>
                   <div 
                     class="slider-fill" 
                     :style="{ 
-                      width: tempSpeedLevel === 1 ? '0' : 
-                             tempSpeedLevel === 4 ? '100%' : 
-                             `calc(((${tempSpeedLevel} - 1) / 3) * (100% - 44px) + 44px)` 
+                      width: tempDirectSpeed === 1 ? '0' : 
+                             tempDirectSpeed === 4 ? '100%' : 
+                             `calc(((${tempDirectSpeed} - 1) / 3) * (100% - 44px) + 44px)` 
                     }"
                   ></div>
                   <div class="slider-dots">
@@ -306,7 +305,7 @@ const selectDelayTime = (index: number) => {
                 </div>
                 <input 
                   type="range" 
-                  v-model.number="tempSpeedLevel" 
+                  v-model.number="tempDirectSpeed" 
                   min="1" 
                   max="4" 
                   step="1"
@@ -323,7 +322,7 @@ const selectDelayTime = (index: number) => {
               <div class="speed-label-header">
                 <span class="speed-label-text">自然风调节</span>
                 <span class="speed-label-divider">|</span>
-                <span class="speed-label-value">{{ ['湖畔', '霜营', '果岭', '梯田'][speedLevel - 1] }}</span>
+                <span class="speed-label-value">{{ ['湖畔', '霜营', '果岭', '梯田'][natureSpeed - 1] }}</span>
               </div>
               <div class="speed-levels">
                 <div 
@@ -333,9 +332,9 @@ const selectDelayTime = (index: number) => {
                 >
                   <button
                     class="speed-level-circle"
-                    :class="{ active: speedLevel === index + 1 }"
+                    :class="{ active: natureSpeed === index + 1 }"
                     :disabled="device.status === 'offline'"
-                    @click="speedLevel = index + 1"
+                    @click="natureSpeed = index + 1"
                   >
                     {{ index + 1 }}
                   </button>
@@ -492,11 +491,9 @@ const selectDelayTime = (index: number) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -589,10 +586,8 @@ const selectDelayTime = (index: number) => {
 }
 
 .fan-power-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .fan-power-btn.disabled {
@@ -679,17 +674,13 @@ const selectDelayTime = (index: number) => {
 }
 
 .mode-select-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .mode-select-btn.active:hover {
-  background: linear-gradient(135deg, rgba(69, 140, 255, 0.7) 0%, rgba(89, 182, 255, 0.6) 100%);
-  border-color: rgba(69, 140, 255, 0.5);
+  background: var(--dialog-btn-active-bg-2);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
 }
 
 .mode-select-btn:disabled {
@@ -1125,11 +1116,9 @@ const selectDelayTime = (index: number) => {
 .angle-selector-dialog {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -1174,16 +1163,15 @@ const selectDelayTime = (index: number) => {
 }
 
 .angle-option.active {
-  background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
-  border-color: rgba(38, 208, 206, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(38, 208, 206, 0.4);
+  border-color: transparent;
 }
 
 .angle-option.active:hover {
-  background: linear-gradient(135deg, #30e0de 0%, #29b1af 100%);
+  background: var(--dialog-btn-active-bg-1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(38, 208, 206, 0.5);
+  box-shadow: 0 6px 24px var(--dialog-btn-active-shadow);
 }
 
 /* 延时关闭 */
@@ -1273,11 +1261,9 @@ const selectDelayTime = (index: number) => {
 .time-picker-dialog {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -1323,9 +1309,7 @@ const selectDelayTime = (index: number) => {
 
 .time-option.active {
   background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
-  border-color: rgba(38, 208, 206, 0.4);
   color: white;
-  box-shadow: 0 4px 20px rgba(38, 208, 206, 0.4);
 }
 
 .time-option.active:hover {

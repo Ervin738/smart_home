@@ -4,7 +4,7 @@
   触发：单击风扇设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { computed } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
 import { useDevicesStore } from '@/features/device/store/devices.store'
 
@@ -22,7 +22,7 @@ const devicesStore = useDevicesStore()
 // 风扇模式
 const fanModes = ['直吹风', '自然风']
 const currentModeIndex = computed({
-  get: () => props.device?.fanModeIndex ?? 0,
+  get: () => (props.device as any)?.fanModeIndex ?? 0,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setFanMode(props.device.id, value)
@@ -32,7 +32,7 @@ const currentModeIndex = computed({
 
 // 使用计算属性从设备获取风速
 const localSpeedLevel = computed({
-  get: () => props.device?.speedLevel ?? 1,
+  get: () => (props.device as any)?.speedLevel ?? 1,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setSpeedLevel(props.device.id, value)
@@ -128,9 +128,9 @@ const toggleFanMode = () => {
   padding: 12px 16px;
   background: linear-gradient(
     135deg,
-    rgba(30, 40, 60, 0.95) 0%,
-    rgba(40, 55, 80, 0.95) 50%,
-    rgba(50, 70, 100, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -164,7 +164,7 @@ const toggleFanMode = () => {
 }
 
 .control-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   border-radius: 16px;
   color: white;
@@ -197,7 +197,7 @@ const toggleFanMode = () => {
 }
 
 .mode-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   color: white;
 }
 

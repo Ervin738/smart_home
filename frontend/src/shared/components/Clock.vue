@@ -5,7 +5,9 @@
 -->
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useThemeStore } from '@/stores/theme'
 
+const themeStore = useThemeStore()
 const now = ref(new Date())
 
 const dateText = computed(() => {
@@ -43,7 +45,12 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.clock { display: flex; flex-direction: column; gap: 6px; }
+.clock { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 6px;
+  color: v-bind('themeStore.textColor');
+}
 .clock-date { font-size: 15px; letter-spacing: 0.15em; font-weight: 500; opacity: 0.9; }
 .clock-time { font-size: 48px; line-height: 1; font-weight: 600; letter-spacing: -0.01em; }
 

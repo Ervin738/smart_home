@@ -4,8 +4,9 @@
   触发：单击加湿器设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -17,14 +18,18 @@ const emit = defineEmits<{
   (e: 'select-level', level: number): void
 }>()
 
-const selectedLevel = ref(1)
+const store = useDevicesStore()
 
 const levels = [
   { label: '1档', value: 1 },
   { label: '2档', value: 2 },
-  { label: '3档', value: 3 },
-  { label: '恒湿', value: 4 }
+  { label: '恒湿', value: 3 }
 ]
+
+const selectedLevel = computed({
+  get: () => (props.device as any)?.humidifierLevel ?? 1,
+  set: (level: number) => { if (props.device) store.setDeviceExtra(props.device.id, { humidifierLevel: level }) }
+})
 
 const handleLevelSelect = (level: number) => {
   if (props.device?.status === 'offline') return
@@ -32,39 +37,9 @@ const handleLevelSelect = (level: number) => {
   emit('select-level', level)
 }
 
-// 当设备改变时，恢复该设备的档位状态
-watch(() => props.device?.id, (newId) => {
-  if (newId && props.device) {
-    const device = props.device as any
-    // 从设备属性中恢复档位，如果没有则默认为1
-    selectedLevel.value = device.humidifierLevel || 1
-  }
-})
-
-// 当档位改变时，同步到设备对象
-watch(selectedLevel, (newLevel) => {
-  if (props.device) {
-    const device = props.device as any
-    device.humidifierLevel = newLevel
-  }
-})
-
-// 初始化时恢复状态
-watch(() => props.visible, (visible) => {
-  if (visible && props.device) {
-    const device = props.device as any
-    selectedLevel.value = device.humidifierLevel || 1
-  }
-})
-
-// 关闭电源时重置档位为1档
 watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    selectedLevel.value = 1
-    if (props.device) {
-      const device = props.device as any
-      device.humidifierLevel = 1
-    }
+  if (newStatus === 'offline' && props.device) {
+    store.setDeviceExtra(props.device.id, { humidifierLevel: 1 })
   }
 })
 </script>
@@ -129,9 +104,9 @@ watch(() => props.device?.status, (newStatus) => {
   padding: 12px 16px;
   background: linear-gradient(
     135deg,
-    rgba(30, 40, 60, 0.95) 0%,
-    rgba(40, 55, 80, 0.95) 50%,
-    rgba(50, 70, 100, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -165,7 +140,7 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .control-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   border-radius: 16px;
   color: white;
@@ -209,7 +184,7 @@ watch(() => props.device?.status, (newStatus) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 24px;
+  padding: 18px 24px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   border-radius: 16px;
@@ -223,7 +198,7 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .level-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
 }
 

@@ -116,11 +116,9 @@ const emit = defineEmits<{
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -179,9 +177,13 @@ const emit = defineEmits<{
   justify-content: space-around;
   margin-bottom: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, rgba(30, 50, 90, 0.4) 0%, rgba(20, 40, 70, 0.3) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
   border-radius: 16px;
-  border: 1px solid rgba(100, 180, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .socket-stat {
@@ -212,7 +214,7 @@ const emit = defineEmits<{
 .socket-detail-link {
   text-align: center;
   font-size: 13px;
-  color: rgba(79, 172, 254, 0.8);
+  color: var(--dialog-text);
   margin-bottom: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -254,10 +256,10 @@ const emit = defineEmits<{
 }
 
 .control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
+  border: none;
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: none;
 }
 
 .control-btn.disabled {

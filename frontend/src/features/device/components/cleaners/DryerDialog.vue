@@ -4,8 +4,9 @@
   触发：长按烘干机设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -19,52 +20,22 @@ const emit = defineEmits<{
   (e: 'update:mode', index: number): void
 }>()
 
-const activeModeIndex = ref(-1)
-const isDrying = ref(false)
-
+const devicesStore = useDevicesStore()
 const modeOptions = ['智能烘', '快速烘', '节能烘', '大件烘', '小件烘', '除菌烘', '除异味', '除静电']
 
-// 当设备改变时，恢复该设备的状态
-watch(() => props.device?.id, (newId) => {
-  if (newId && props.device) {
-    const device = props.device as any
-    const modeName = device.dryerModeName
-    if (modeName) {
-      activeModeIndex.value = modeOptions.indexOf(modeName)
-    } else {
-      activeModeIndex.value = -1
-    }
-    isDrying.value = device.dryerIsWorking ?? false
+const activeModeIndex = computed({
+  get: () => {
+    const name = (props.device as any)?.dryerModeName
+    return name ? modeOptions.indexOf(name) : -1
+  },
+  set: (index: number) => {
+    if (props.device) devicesStore.setDeviceExtra(props.device.id, { dryerModeName: index >= 0 ? modeOptions[index] : '' })
   }
 })
 
-// 当状态改变时，同步到设备对象
-watch(activeModeIndex, (newIndex) => {
-  if (props.device) {
-    const device = props.device as any
-    device.dryerModeName = newIndex >= 0 ? modeOptions[newIndex] : ''
-  }
-})
-
-watch(isDrying, (newValue) => {
-  if (props.device) {
-    const device = props.device as any
-    device.dryerIsWorking = newValue
-  }
-})
-
-// 初始化时恢复状态
-watch(() => props.visible, (visible) => {
-  if (visible && props.device) {
-    const device = props.device as any
-    const modeName = device.dryerModeName
-    if (modeName) {
-      activeModeIndex.value = modeOptions.indexOf(modeName)
-    } else {
-      activeModeIndex.value = -1
-    }
-    isDrying.value = device.dryerIsWorking ?? false
-  }
+const isDrying = computed({
+  get: () => (props.device as any)?.dryerIsWorking ?? false,
+  set: (v: boolean) => { if (props.device) devicesStore.setDeviceExtra(props.device.id, { dryerIsWorking: v }) }
 })
 
 const handleModeSelect = (index: number) => {
@@ -75,21 +46,14 @@ const handleModeSelect = (index: number) => {
 
 const handleDryToggle = () => {
   if (!props.device || props.device.status === 'offline') return
-  if (activeModeIndex.value === -1) return // 未选择模式
+  if (activeModeIndex.value === -1) return
   isDrying.value = !isDrying.value
   emit('toggle-drying')
 }
 
-// 关闭电源时重置模式选择和工作状态
 watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    activeModeIndex.value = -1
-    isDrying.value = false
-    if (props.device) {
-      const device = props.device as any
-      device.dryerModeName = ''
-      device.dryerIsWorking = false
-    }
+  if (newStatus === 'offline' && props.device) {
+    devicesStore.setDeviceExtra(props.device.id, { dryerModeName: '', dryerIsWorking: false })
   }
 })
 </script>
@@ -169,11 +133,9 @@ watch(() => props.device?.status, (newStatus) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -258,10 +220,8 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
 }
 
 .control-btn.disabled {
@@ -338,10 +298,8 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .mode-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
 }
 
 .mode-btn.disabled {

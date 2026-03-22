@@ -4,8 +4,9 @@
   触发：长按台灯设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -21,20 +22,16 @@ const emit = defineEmits<{
   (e: 'update:mode', index: number): void
 }>()
 
+const devicesStore = useDevicesStore()
 const dialogBrightness = ref(0)
 const dialogColorTemp = ref(2700)
-const activeModeIndex = ref(-1)
+
+const activeModeIndex = computed(() => (props.device as any)?.lightModeIndex ?? -1)
 
 watch(() => props.device, (device) => {
   if (device && device.type === 'light') {
     dialogBrightness.value = device.brightness ?? 0
     dialogColorTemp.value = device.colorTemp ?? 2700
-  }
-}, { flush: 'post' })
-
-watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    activeModeIndex.value = -1
   }
 }, { flush: 'post' })
 
@@ -57,8 +54,7 @@ const modeOptions = [
 
 const handleModeSelect = (mode: any, index: number) => {
   if (!props.device || props.device.status === 'offline') return
-  
-  activeModeIndex.value = index
+  devicesStore.setLightMode(props.device.id, index)
   dialogBrightness.value = mode.brightness
   dialogColorTemp.value = mode.colorTemp
   emit('update:brightness', mode.brightness)
@@ -194,11 +190,9 @@ const handleModeSelect = (mode: any, index: number) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -456,10 +450,10 @@ const handleModeSelect = (mode: any, index: number) => {
 }
 
 .control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
+  border: none;
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: none;
 }
 
 .btn-icon {
@@ -526,10 +520,10 @@ const handleModeSelect = (mode: any, index: number) => {
 }
 
 .mode-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
+  border: none;
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: none;
 }
 
 .mode-btn.disabled {

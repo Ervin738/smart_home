@@ -56,6 +56,46 @@ export const NETWORK_TYPE_LABELS: Record<string, string> = {
   'wifi-extender': 'WiFi信号放大器'
 }
 
+// 安防类型标签
+export const SECURITY_TYPE_LABELS: Record<string, string> = {
+  'camera': '摄像机',
+  'door-lock': '门锁',
+  'smart-door': '智能门'
+}
+
+// 个护与起居类型标签
+export const PERSONAL_TYPE_LABELS: Record<string, string> = {
+  'smart-bed': '智能床',
+  'smart-pillow': '智能枕头',
+  'electric-blanket': '电热毯',
+  'window-opener': '开窗器'
+}
+
+// 卫浴类型标签
+export const BATHROOM_TYPE_LABELS: Record<string, string> = {
+  'toilet': '智能马桶',
+  'water-heater': '热水器',
+  'yuba': '浴霸'
+}
+
+// 厨房电器类型标签
+export const KITCHEN_TYPE_LABELS: Record<string, string> = {
+  'rice-cooker': '电饭煲',
+  'induction-cooker': '电磁炉',
+  'range-hood': '净烟机',
+  'electric-kettle': '电水壶',
+  'air-fryer': '空气炸锅',
+  'water-dispenser': '饮水机'
+}
+
+// 影音娱乐类型标签
+export const ENTERTAINMENT_TYPE_LABELS: Record<string, string> = {
+  'tv': '电视',
+  'speaker': '音箱',
+  'projector': '投影仪',
+  'clock': '时钟'
+}
+
 /**
  * 获取设备显示类型
  * @param device 设备对象
@@ -78,6 +118,21 @@ export function getDeviceDisplayType(device: any): string {
   }
   if (device.environmentType && ENVIRONMENT_TYPE_LABELS[device.environmentType]) {
     return ENVIRONMENT_TYPE_LABELS[device.environmentType] || ''
+  }
+  if (device.securityType && SECURITY_TYPE_LABELS[device.securityType]) {
+    return SECURITY_TYPE_LABELS[device.securityType] || ''
+  }
+  if (device.personalType && PERSONAL_TYPE_LABELS[device.personalType]) {
+    return PERSONAL_TYPE_LABELS[device.personalType] || ''
+  }
+  if (device.bathroomType && BATHROOM_TYPE_LABELS[device.bathroomType]) {
+    return BATHROOM_TYPE_LABELS[device.bathroomType] || ''
+  }
+  if (device.kitchenType && KITCHEN_TYPE_LABELS[device.kitchenType]) {
+    return KITCHEN_TYPE_LABELS[device.kitchenType] || ''
+  }
+  if (device.entertainmentType && ENTERTAINMENT_TYPE_LABELS[device.entertainmentType]) {
+    return ENTERTAINMENT_TYPE_LABELS[device.entertainmentType] || ''
   }
   return TYPE_LABELS[device.type] || device.type || ''
 }

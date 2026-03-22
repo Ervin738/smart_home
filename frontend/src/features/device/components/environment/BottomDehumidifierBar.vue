@@ -19,48 +19,46 @@ const emit = defineEmits<{
 
 const devicesStore = useDevicesStore()
 
-const modes = [
-  { label: '智能', value: 0 },
-  { label: '睡眠', value: 1 },
-  { label: '干衣', value: 2 }
-]
+// 目标湿度 (40-70%)
+const targetHumidity = ref(50)
+const tempTargetHumidity = ref(50)
+const isDragging = ref(false)
 
-const selectedMode = ref(0)
-
-const handleModeSelect = (mode: number) => {
-  if (props.device?.status === 'offline') return
-  selectedMode.value = mode
-  if (props.device) {
-    devicesStore.setDehumidifierMode(props.device.id, mode)
+// 监听设备目标湿度变化，同步临时值
+watch(() => (props.device as any)?.targetHumidity, (newValue) => {
+  if (newValue !== undefined && !isDragging.value) {
+    tempTargetHumidity.value = newValue
+    targetHumidity.value = newValue
   }
-}
-
-// 当设备改变时，恢复该设备的模式状态
-watch(() => props.device?.id, (newId) => {
-  if (newId && props.device) {
-    const device = props.device as any
-    selectedMode.value = device.dehumidifierModeIndex || 0
-  }
-})
+}, { immediate: true })
 
 // 初始化时恢复状态
 watch(() => props.visible, (visible) => {
   if (visible && props.device) {
     const device = props.device as any
-    selectedMode.value = device.dehumidifierModeIndex || 0
+    const humidity = device.targetHumidity ?? 50
+    targetHumidity.value = humidity
+    tempTargetHumidity.value = humidity
   }
 })
 
-// 关闭电源时重置模式为智能
-watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    selectedMode.value = 0
-    if (props.device) {
-      const device = props.device as any
-      device.dehumidifierModeIndex = 0
-    }
+// 滑块拖动时更新临时值
+const onHumidityInput = (event: Event) => {
+  isDragging.value = true
+  const target = event.target as HTMLInputElement
+  tempTargetHumidity.value = Number(target.value)
+}
+
+// 滑块释放时更新实际值（四舍五入到整数）
+const onHumidityChange = () => {
+  isDragging.value = false
+  const roundedValue = Math.round(tempTargetHumidity.value)
+  tempTargetHumidity.value = roundedValue
+  targetHumidity.value = roundedValue
+  if (props.device) {
+    devicesStore.setTargetHumidity(props.device.id, roundedValue)
   }
-})
+}
 </script>
 
 <template>
@@ -84,24 +82,46 @@ watch(() => props.device?.status, (newStatus) => {
         <!-- 分隔线 -->
         <div class="divider"></div>
         
-        <!-- 右侧模式选择 -->
-        <div class="mode-section">
-          <div 
-            v-for="mode in modes" 
-            :key="mode.value"
-            class="mode-btn"
-            :class="{ 
-              active: selectedMode === mode.value,
-              disabled: device.status === 'offline'
-            }"
-            @click="handleModeSelect(mode.value)"
-          >
-            <span class="mode-label">{{ mode.label }}</span>
+        <!-- 右侧湿度滑条 -->
+        <div class="humidity-section" :class="{ disabled: device.status === 'offline' }">
+          <div class="humidity-slider-wrapper">
+            <div class="slider-track">
+              <div 
+                class="humidity-indicator" 
+                :class="{ dragging: isDragging }"
+                :style="{ left: `calc(((${tempTargetHumidity} - 40) / 30) * (100% - 40px))` }"
+              >
+              </div>
+              <div 
+                class="slider-fill"
+                :class="{ dragging: isDragging }"
+                :style="{ 
+                  width: tempTargetHumidity === 40 ? '0' : 
+                         tempTargetHumidity === 70 ? '100%' : 
+                         `calc(((${tempTargetHumidity} - 40) / 30) * (100% - 40px) + 40px)` 
+                }"
+              ></div>
+            </div>
+            <input 
+              type="range" 
+              v-model.number="tempTargetHumidity" 
+              min="40" 
+              max="70" 
+              step="0.1"
+              class="slider-input"
+              :disabled="device.status === 'offline'"
+              @input="onHumidityInput"
+              @change="onHumidityChange"
+            />
           </div>
         </div>
         
-        <!-- 顶部居中设备名称 -->
-        <div class="device-name">{{ device.name }} · 除湿机</div>
+        <!-- 顶部居中设备名称和湿度显示 -->
+        <div class="device-info-top">
+          <span class="device-name">{{ device.name }} · 除湿机</span>
+          <span class="info-divider">|</span>
+          <span class="humidity-display">目标湿度 {{ Math.round(tempTargetHumidity) }}%</span>
+        </div>
       </div>
     </div>
   </transition>
@@ -123,9 +143,9 @@ watch(() => props.device?.status, (newStatus) => {
   padding: 12px 16px;
   background: linear-gradient(
     135deg,
-    rgba(30, 40, 60, 0.95) 0%,
-    rgba(40, 55, 80, 0.95) 50%,
-    rgba(50, 70, 100, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -159,7 +179,7 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .control-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   border-radius: 16px;
   color: white;
@@ -187,66 +207,123 @@ watch(() => props.device?.status, (newStatus) => {
   margin: 0 4px;
 }
 
-.mode-section {
+.humidity-section {
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  min-width: 240px;
+  transition: opacity 0.3s ease;
 }
 
-.mode-section::-webkit-scrollbar {
-  display: none;
-}
-
-.mode-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 24px;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  border-radius: 16px;
-  cursor: pointer;
-  transition: all 0.2s;
-  white-space: nowrap;
-}
-
-.mode-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.mode-btn.active {
-  background: rgb(59, 130, 246);
-  border: none;
-}
-
-.mode-btn.disabled {
+.humidity-section.disabled {
   opacity: 0.5;
-  cursor: not-allowed;
+  pointer-events: none;
 }
 
-.mode-label {
-  font-size: 15px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.mode-btn.active .mode-label {
-  color: white;
-}
-
-.device-name {
-  position: absolute;
-  top: -32px;
-  left: 50%;
-  transform: translateX(-50%);
+.humidity-display {
   font-size: 15px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
+}
+
+.device-info-top {
+  position: absolute;
+  top: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  flex-wrap: nowrap;
+}
+
+.device-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
   letter-spacing: 1px;
+}
+
+.info-divider {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 15px;
+}
+
+.humidity-slider-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.slider-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  z-index: 20;
+}
+
+.slider-track {
+  height: 40px;
+  background: linear-gradient(
+    90deg,
+    rgba(58, 58, 110, 0.7) 0%,
+    rgba(74, 74, 122, 0.6) 50%,
+    rgba(77, 90, 122, 0.5) 100%
+  );
+  border-radius: 20px;
+  position: relative;
+  overflow: visible;
+  border: 1px solid rgba(150, 180, 220, 0.25);
+  display: flex;
+  align-items: center;
+}
+
+.humidity-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(38, 208, 206, 0.4);
+  z-index: 10;
+  transition: left 0.15s ease-out;
+}
+
+.humidity-indicator.dragging {
+  transition: none;
+}
+
+.slider-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #26d0ce 0%, #1fa19f 100%);
+  border-radius: 20px;
+  transition: width 0.15s ease-out;
+  pointer-events: none;
+  box-shadow:
+    0 0 20px rgba(38, 208, 206, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.slider-fill.dragging {
+  transition: none;
 }
 
 .slide-up-enter-active, .slide-up-leave-active {

@@ -4,8 +4,9 @@
   触发：长按洗衣机设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -19,52 +20,22 @@ const emit = defineEmits<{
   (e: 'update:mode', index: number): void
 }>()
 
-const activeModeIndex = ref(-1)
-const isWashing = ref(false)
-
+const devicesStore = useDevicesStore()
 const modeOptions = ['智能洗', '随心洗烘', '快速洗', '大件洗', '轻柔洗', '强力洗', '轻干洗', '单脱水']
 
-// 当设备改变时，恢复该设备的状态
-watch(() => props.device?.id, (newId) => {
-  if (newId && props.device) {
-    const device = props.device as any
-    const modeName = device.washingModeName
-    if (modeName) {
-      activeModeIndex.value = modeOptions.indexOf(modeName)
-    } else {
-      activeModeIndex.value = -1
-    }
-    isWashing.value = device.washingIsWorking ?? false
+const activeModeIndex = computed({
+  get: () => {
+    const name = (props.device as any)?.washingModeName
+    return name ? modeOptions.indexOf(name) : -1
+  },
+  set: (index: number) => {
+    if (props.device) devicesStore.setDeviceExtra(props.device.id, { washingModeName: index >= 0 ? modeOptions[index] : '' })
   }
 })
 
-// 当状态改变时，同步到设备对象
-watch(activeModeIndex, (newIndex) => {
-  if (props.device) {
-    const device = props.device as any
-    device.washingModeName = newIndex >= 0 ? modeOptions[newIndex] : ''
-  }
-})
-
-watch(isWashing, (newValue) => {
-  if (props.device) {
-    const device = props.device as any
-    device.washingIsWorking = newValue
-  }
-})
-
-// 初始化时恢复状态
-watch(() => props.visible, (visible) => {
-  if (visible && props.device) {
-    const device = props.device as any
-    const modeName = device.washingModeName
-    if (modeName) {
-      activeModeIndex.value = modeOptions.indexOf(modeName)
-    } else {
-      activeModeIndex.value = -1
-    }
-    isWashing.value = device.washingIsWorking ?? false
-  }
+const isWashing = computed({
+  get: () => (props.device as any)?.washingIsWorking ?? false,
+  set: (v: boolean) => { if (props.device) devicesStore.setDeviceExtra(props.device.id, { washingIsWorking: v }) }
 })
 
 const handleModeSelect = (index: number) => {
@@ -75,21 +46,14 @@ const handleModeSelect = (index: number) => {
 
 const handleWashToggle = () => {
   if (!props.device || props.device.status === 'offline') return
-  if (activeModeIndex.value === -1) return // 未选择模式
+  if (activeModeIndex.value === -1) return
   isWashing.value = !isWashing.value
   emit('toggle-washing')
 }
 
-// 关闭电源时重置模式选择和工作状态
 watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    activeModeIndex.value = -1
-    isWashing.value = false
-    if (props.device) {
-      const device = props.device as any
-      device.washingModeName = ''
-      device.washingIsWorking = false
-    }
+  if (newStatus === 'offline' && props.device) {
+    devicesStore.setDeviceExtra(props.device.id, { washingModeName: '', washingIsWorking: false })
   }
 })
 </script>
@@ -169,10 +133,9 @@ watch(() => props.device?.status, (newStatus) => {
 .dialog-content {
   background: linear-gradient(
     135deg,
-    rgba(26, 42, 78, 0.75) 0%,
-    rgba(42, 58, 90, 0.7) 30%,
-    rgba(58, 90, 122, 0.75) 70%,
-    rgba(42, 58, 90, 0.7) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   backdrop-filter: blur(20px) saturate(150%);
   -webkit-backdrop-filter: blur(20px) saturate(150%);
@@ -263,10 +226,10 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, var(--dialog-btn-active-bg-1) 0%, var(--dialog-btn-active-bg-2) 100%);
+  border-color: var(--dialog-btn-active-border);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 20px var(--dialog-btn-active-shadow);
 }
 
 .control-btn.disabled {
@@ -343,10 +306,10 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .mode-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: linear-gradient(135deg, var(--dialog-btn-active-bg-1) 0%, var(--dialog-btn-active-bg-2) 100%);
+  border-color: var(--dialog-btn-active-border);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 4px 20px var(--dialog-btn-active-shadow);
 }
 
 .mode-btn.disabled {

@@ -7,13 +7,126 @@ body,
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  color: rgba(255, 255, 255, 0.95);
   letter-spacing: 0.03em;
-  font-weight: 400;
+}
+
+/* 暗色主题的弹窗颜色变量（默认） */
+:root,
+body {
+  /* 对话框和弹窗背景 - 使用青绿色系 */
+  --dialog-bg-1: rgba(0, 95, 115, 0.85);
+  --dialog-bg-2: rgba(10, 147, 150, 0.8);
+  --dialog-bg-3: rgba(20, 184, 166, 0.85);
+  --dialog-border: rgba(255, 255, 255, 0.08);
+  --dialog-shadow: rgba(0, 0, 0, 0.5);
+  --dialog-text: white;
+  --dialog-overlay: rgba(0, 0, 0, 0.5);
+  
+  /* 对话框按钮 */
+  --dialog-btn-cancel-bg: rgba(255, 255, 255, 0.08);
+  --dialog-btn-cancel-border: rgba(255, 255, 255, 0.1);
+  --dialog-btn-cancel-text: rgba(255, 255, 255, 0.85);
+  --dialog-btn-confirm-bg-1: rgba(6, 182, 212, 0.6);
+  --dialog-btn-confirm-bg-2: rgba(20, 184, 166, 0.5);
+  --dialog-btn-confirm-border: rgba(6, 182, 212, 0.4);
+  
+  /* 底部控制栏背景色 - 使用更亮的青绿色 */
+  --bottom-bar-bg-1: rgba(0, 95, 115, 0.95);
+  --bottom-bar-bg-2: rgba(10, 147, 150, 0.95);
+  --bottom-bar-bg-3: rgba(20, 184, 166, 0.95);
+  
+  /* 底部控制栏按钮激活状态 - 使用明亮的青绿色渐变，与背景形成强对比 */
+  --bottom-bar-active-bg: linear-gradient(135deg, rgba(45, 212, 191, 0.95) 0%, rgba(20, 184, 166, 0.95) 50%, rgba(6, 182, 212, 0.95) 100%);
+  
+  /* 对话框按钮激活状态 - 使用明显的青色 */
+  --dialog-btn-active-bg-1: rgba(6, 182, 212, 0.7);
+  --dialog-btn-active-bg-2: rgba(20, 184, 166, 0.6);
+  --dialog-btn-active-border: rgba(6, 182, 212, 0.5);
+  --dialog-btn-active-shadow: rgba(6, 182, 212, 0.4);
+  
+  /* 对话框按钮激活状态（较淡版本） */
+  --dialog-btn-active-light-bg-1: rgba(6, 182, 212, 0.6);
+  --dialog-btn-active-light-bg-2: rgba(20, 184, 166, 0.5);
+  --dialog-btn-active-light-border: rgba(6, 182, 212, 0.4);
+  --dialog-btn-active-light-shadow: rgba(6, 182, 212, 0.3);
+  
+  /* 滑块激活状态 */
+  --slider-active-color-1: rgba(6, 182, 212, 0.9);
+  --slider-active-color-2: rgba(20, 184, 166, 0.95);
+  --slider-active-color-3: rgba(45, 212, 191, 1);
+  
+  /* 玻璃态效果通用变量 */
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+  --glass-border: rgba(255, 255, 255, 0.25);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.2);
+
+  /* 设备卡片状态徽章背景 */
+  --card-badge-bg: rgba(255, 255, 255, 0.12);
+  --card-badge-border: rgba(255, 255, 255, 0.22);
+  --card-badge-color: rgba(255, 255, 255, 0.95);
+  --card-badge-shadow: 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 亮色主题的弹窗颜色变量 */
+body.theme-light {
+  /* 对话框和弹窗背景 - 使用蓝色系 */
+  --dialog-bg-1: rgba(147, 197, 253, 0.85);
+  --dialog-bg-2: rgba(125, 211, 252, 0.8);
+  --dialog-bg-3: rgba(96, 165, 250, 0.85);
+  --dialog-border: rgba(59, 130, 246, 0.25);
+  --dialog-shadow: rgba(59, 130, 246, 0.15);
+  --dialog-text: rgba(30, 64, 175, 0.95);
+  --dialog-overlay: rgba(0, 0, 0, 0.3);
+  
+  /* 对话框按钮 */
+  --dialog-btn-cancel-bg: rgba(255, 255, 255, 0.4);
+  --dialog-btn-cancel-border: rgba(59, 130, 246, 0.25);
+  --dialog-btn-cancel-text: rgba(30, 64, 175, 0.85);
+  --dialog-btn-confirm-bg-1: rgba(59, 130, 246, 0.7);
+  --dialog-btn-confirm-bg-2: rgba(37, 99, 235, 0.6);
+  --dialog-btn-confirm-border: rgba(59, 130, 246, 0.3);
+  
+  /* 底部控制栏背景色 */
+  --bottom-bar-bg-1: rgba(147, 197, 253, 0.95);
+  --bottom-bar-bg-2: rgba(125, 211, 252, 0.95);
+  --bottom-bar-bg-3: rgba(96, 165, 250, 0.95);
+  
+  /* 底部控制栏按钮激活状态 - 使用明亮的蓝色 */
+  --bottom-bar-active-bg: linear-gradient(135deg, rgb(59, 130, 246) 0%, rgb(37, 99, 235) 100%);
+  
+  /* 对话框按钮激活状态 */
+  --dialog-btn-active-bg-1: rgba(59, 130, 246, 0.7);
+  --dialog-btn-active-bg-2: rgba(79, 172, 254, 0.6);
+  --dialog-btn-active-border: rgba(59, 130, 246, 0.5);
+  --dialog-btn-active-shadow: rgba(59, 130, 246, 0.4);
+  
+  /* 对话框按钮激活状态（较淡版本） */
+  --dialog-btn-active-light-bg-1: rgba(59, 130, 246, 0.6);
+  --dialog-btn-active-light-bg-2: rgba(79, 172, 254, 0.5);
+  --dialog-btn-active-light-border: rgba(59, 130, 246, 0.4);
+  --dialog-btn-active-light-shadow: rgba(59, 130, 246, 0.3);
+  
+  /* 滑块激活状态 */
+  --slider-active-color-1: rgba(59, 130, 246, 0.9);
+  --slider-active-color-2: rgba(79, 172, 254, 0.95);
+  --slider-active-color-3: rgba(99, 192, 255, 1);
+  
+  /* 玻璃态效果通用变量 */
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
+  --glass-border: rgba(59, 130, 246, 0.3);
+  --glass-shadow: 0 8px 32px rgba(59, 130, 246, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.6);
+
+  /* 设备卡片状态徽章背景 */
+  --card-badge-bg: rgba(255, 255, 255, 0.15);
+  --card-badge-border: rgba(255, 255, 255, 0.25);
+  --card-badge-color: rgba(255, 255, 255, 0.95);
+  --card-badge-shadow: 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 /* 隐藏滚动条 */
@@ -26,124 +139,59 @@ body,
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* 下拉框允许滚动 */
+.el-select-dropdown__wrap {
+  scrollbar-width: thin !important; /* Firefox */
+  -ms-overflow-style: auto !important; /* IE and Edge */
+  overflow-y: auto !important;
+}
+
+.el-select-dropdown__list {
+  scrollbar-width: thin !important; /* Firefox */
+  -ms-overflow-style: auto !important; /* IE and Edge */
+  overflow-y: auto !important;
+}
+
+.el-select-dropdown__wrap::-webkit-scrollbar,
+.el-select-dropdown__list::-webkit-scrollbar {
+  display: block !important; /* Chrome, Safari, Opera */
+  width: 6px !important;
+}
+
+.el-select-dropdown__wrap::-webkit-scrollbar-track,
+.el-select-dropdown__list::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1) !important;
+  border-radius: 3px !important;
+}
+
+.el-select-dropdown__wrap::-webkit-scrollbar-thumb,
+.el-select-dropdown__list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3) !important;
+  border-radius: 3px !important;
+}
+
+.el-select-dropdown__wrap::-webkit-scrollbar-thumb:hover,
+.el-select-dropdown__list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+body.theme-light .el-select-dropdown__wrap::-webkit-scrollbar-thumb,
+body.theme-light .el-select-dropdown__list::-webkit-scrollbar-thumb {
+  background: rgba(30, 64, 175, 0.3) !important;
+}
+
+body.theme-light .el-select-dropdown__wrap::-webkit-scrollbar-thumb:hover,
+body.theme-light .el-select-dropdown__list::-webkit-scrollbar-thumb:hover {
+  background: rgba(30, 64, 175, 0.5) !important;
+}
+
 body {
   margin: 0;
-  background:
-    /* 满天星 - 亮星 */
-    radial-gradient(2px 2px at 5% 5%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 15% 8%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 25% 3%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 35% 10%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 45% 6%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 55% 12%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 65% 4%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 75% 9%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 85% 7%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 95% 11%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 12% 28%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 32% 35%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 52% 42%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 72% 38%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 92% 32%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 8% 55%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 28% 62%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 48% 58%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 68% 65%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 88% 52%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 18% 78%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 38% 85%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 58% 82%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 78% 88%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    radial-gradient(2px 2px at 98% 75%, rgba(255, 255, 255, 1) 0%, transparent 100%),
-    /* 满天星 - 中等星 */
-    radial-gradient(1.5px 1.5px at 10% 15%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 20% 22%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 30% 18%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 40% 25%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 50% 20%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 60% 28%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 70% 16%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 80% 24%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 90% 19%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 5% 38%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 15% 45%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 25% 42%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 35% 48%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 45% 52%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 55% 46%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 65% 55%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 75% 48%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 85% 58%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 95% 45%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 8% 68%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 22% 72%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 42% 75%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 62% 70%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 82% 78%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 12% 88%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 32% 92%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 52% 95%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 72% 90%, rgba(255, 255, 255, 0.9) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 92% 85%, rgba(255, 255, 255, 0.95) 0%, transparent 100%),
-    /* 满天星 - 小星 */
-    radial-gradient(1px 1px at 3% 12%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 13% 6%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 23% 14%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 33% 8%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 43% 16%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 53% 10%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 63% 18%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 73% 12%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 83% 20%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 93% 14%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 7% 32%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 17% 38%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 27% 34%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 37% 40%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 47% 36%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 57% 44%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 67% 38%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 77% 46%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 87% 42%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 97% 36%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 4% 56%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 14% 62%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 24% 58%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 34% 66%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 44% 60%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 54% 68%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 64% 62%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 74% 70%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 84% 64%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 94% 58%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 9% 82%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 19% 88%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 29% 84%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 39% 90%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 49% 86%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 59% 92%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 69% 88%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 79% 94%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    radial-gradient(1px 1px at 89% 82%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 99% 88%, rgba(255, 255, 255, 0.75) 0%, transparent 100%),
-    /* 柔和光晕 */
-    radial-gradient(ellipse 60% 50% at 20% 40%, rgba(33, 123, 156, 0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 50% 40% at 80% 30%, rgba(33, 12, 82, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse 55% 45% at 50% 70%, rgba(33, 80, 120, 0.1) 0%, transparent 50%),
-    /* 主渐变背景 - 深邃蓝黑色调 上下渐变 */
-    linear-gradient(
-      180deg,
-      #0d0d1a 0%,
-      #1a1a2e 25%,
-      #2a3a5a 50%,
-      #3A5A7A 75%,
-      #3A6A9A 100%
-    );
-  background-color: #0d0d1a;
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
   overflow: hidden;
+  transition: background 0.5s ease;
 }
 
 /* 共享动画 */
@@ -161,7 +209,7 @@ body {
 .dialog-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--dialog-overlay, rgba(0, 0, 0, 0.5));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -171,22 +219,22 @@ body {
 .dialog-content {
   background: linear-gradient(
     135deg,
-    rgba(26, 42, 78, 0.85) 0%,
-    rgba(42, 58, 90, 0.8) 30%,
-    rgba(58, 90, 122, 0.85) 70%,
-    rgba(42, 58, 90, 0.8) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 30%,
+    var(--dialog-bg-3) 70%,
+    var(--dialog-bg-2) 100%
   );
   backdrop-filter: blur(30px) saturate(120%);
   -webkit-backdrop-filter: blur(30px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--dialog-border);
   border-radius: 24px;
   padding: 32px;
   min-width: 360px;
   max-width: 90vw;
   box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.5),
-    0 4px 16px rgba(10, 14, 26, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 16px 48px var(--dialog-shadow),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   position: relative;
 }
@@ -200,7 +248,7 @@ body {
     rgba(255, 255, 255, 0.03) 0%,
     transparent 35%,
     transparent 65%,
-    rgba(58, 106, 154, 0.04) 100%
+    rgba(255, 255, 255, 0.02) 100%
   );
   border-radius: 24px;
   pointer-events: none;
@@ -227,12 +275,12 @@ body {
 }
 
 .dialog-header {
-  color: white;
+  color: var(--dialog-text);
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 20px;
   letter-spacing: 0.05em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
 }
 
 .dialog-actions {
@@ -251,7 +299,7 @@ body {
   cursor: pointer;
   transition: all 0.3s ease;
   letter-spacing: 0.05em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  text-shadow: none;
   position: relative;
   overflow: hidden;
 }
@@ -274,33 +322,30 @@ body {
 }
 
 .dialog-btn.cancel {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.08) 0%,
-    rgba(255, 255, 255, 0.05) 100%
-  );
-  color: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--dialog-btn-cancel-bg);
+  color: var(--dialog-btn-cancel-text);
+  border: 1px solid var(--dialog-btn-cancel-border);
 }
 
 .dialog-btn.cancel:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.12) 0%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
+  background: rgba(255, 255, 255, 0.12);
   color: white;
+}
+
+body.theme-light .dialog-btn.cancel:hover {
+  background: rgba(255, 255, 255, 0.55) !important;
+  color: rgba(30, 64, 175, 0.95) !important;
 }
 
 .dialog-btn.confirm {
   background: linear-gradient(
     135deg,
-    rgba(58, 106, 154, 0.35) 0%,
-    rgba(42, 58, 90, 0.28) 50%,
-    rgba(58, 106, 154, 0.32) 100%
+    var(--dialog-btn-confirm-bg-1) 0%,
+    var(--dialog-btn-confirm-bg-2) 50%,
+    var(--dialog-btn-confirm-bg-1) 100%
   );
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--dialog-btn-confirm-border);
   box-shadow: 
     inset 0 1px 2px rgba(255, 255, 255, 0.2),
     0 2px 8px rgba(0, 0, 0, 0.1);
@@ -309,10 +354,19 @@ body {
 .dialog-btn.confirm:hover {
   background: linear-gradient(
     135deg,
-    rgba(58, 106, 154, 0.45) 0%,
-    rgba(42, 58, 90, 0.38) 50%,
-    rgba(58, 106, 154, 0.42) 100%
+    rgba(6, 182, 212, 0.75) 0%,
+    rgba(20, 184, 166, 0.65) 50%,
+    rgba(6, 182, 212, 0.75) 100%
   );
+}
+
+body.theme-light .dialog-btn.confirm:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.8) 0%,
+    rgba(37, 99, 235, 0.7) 50%,
+    rgba(59, 130, 246, 0.8) 100%
+  ) !important;
 }
 
 .dialog-btn.confirm:active {
@@ -386,19 +440,19 @@ body {
 .el-select-dropdown {
   background: linear-gradient(
     135deg,
-    rgba(26, 42, 78, 0.98) 0%,
-    rgba(42, 58, 90, 0.95) 30%,
-    rgba(58, 90, 122, 0.98) 70%,
-    rgba(42, 58, 90, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 30%,
+    var(--dialog-bg-3) 70%,
+    var(--dialog-bg-2) 100%
   ) !important;
   backdrop-filter: blur(30px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(30px) saturate(120%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid var(--dialog-border) !important;
   border-radius: 12px !important;
   box-shadow: 
-    0 16px 48px rgba(0, 0, 0, 0.6),
-    0 4px 16px rgba(10, 14, 26, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 48px var(--dialog-shadow),
+    0 4px 16px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.15) !important;
   overflow: hidden !important;
 }
@@ -406,14 +460,14 @@ body {
 .el-popper.is-light {
   background: linear-gradient(
     135deg,
-    rgba(26, 42, 78, 0.98) 0%,
-    rgba(42, 58, 90, 0.95) 30%,
-    rgba(58, 90, 122, 0.98) 70%,
-    rgba(42, 58, 90, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 30%,
+    var(--dialog-bg-3) 70%,
+    var(--dialog-bg-2) 100%
   ) !important;
   backdrop-filter: blur(30px) saturate(120%) !important;
   -webkit-backdrop-filter: blur(30px) saturate(120%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid var(--dialog-border) !important;
   border-radius: 12px !important;
   overflow: hidden !important;
 }
@@ -426,27 +480,310 @@ body {
 .el-select-dropdown__list {
   padding: 6px !important;
   background: transparent !important;
+  max-height: 274px !important;
+  overflow-y: auto !important;
 }
 
 .el-select-dropdown__item {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: var(--dialog-text) !important;
   transition: all 0.2s ease !important;
   border-radius: 8px !important;
   margin: 2px 0 !important;
   background: transparent !important;
+  opacity: 0.9;
 }
 
 .el-select-dropdown__item:hover {
   background: rgba(255, 255, 255, 0.15) !important;
-  color: white !important;
+  color: var(--dialog-text) !important;
+  opacity: 1;
+}
+
+body.theme-light .el-select-dropdown__item:hover {
+  background: rgba(59, 130, 246, 0.15) !important;
 }
 
 .el-select-dropdown__item.is-selected {
-  background: rgba(58, 106, 154, 0.4) !important;
-  color: white !important;
+  background: rgba(10, 147, 150, 0.4) !important;
+  color: var(--dialog-text) !important;
   font-weight: 600 !important;
+  opacity: 1;
+}
+
+body.theme-light .el-select-dropdown__item.is-selected {
+  background: rgba(59, 130, 246, 0.3) !important;
 }
 
 .el-select-dropdown__item.is-hovering {
   background: rgba(255, 255, 255, 0.15) !important;
+}
+
+
+/* 底部控制栏和设备弹窗的主题适配 */
+:root,
+body {
+  /* 暗色主题的底部栏和弹窗背景 - 使用深海秘境颜色 */
+  --bottom-bar-bg-1: rgba(0, 18, 25, 0.95);
+  --bottom-bar-bg-2: rgba(0, 95, 115, 0.95);
+  --bottom-bar-bg-3: rgba(10, 147, 150, 0.95);
+  --bottom-bar-border: rgba(10, 147, 150, 0.3);
+  --bottom-bar-text: rgba(255, 255, 255, 0.9);
+  
+  --device-dialog-bg-1: rgba(0, 18, 25, 0.85);
+  --device-dialog-bg-2: rgba(0, 95, 115, 0.8);
+  --device-dialog-bg-3: rgba(10, 147, 150, 0.85);
+}
+
+/* 亮色主题的底部栏和弹窗背景 - 使用更深的颜色提高对比度 */
+body.theme-light {
+  --bottom-bar-bg-1: rgba(96, 165, 250, 0.9);
+  --bottom-bar-bg-2: rgba(125, 211, 252, 0.9);
+  --bottom-bar-bg-3: rgba(147, 197, 253, 0.9);
+  --bottom-bar-border: rgba(59, 130, 246, 0.35);
+  --bottom-bar-text: rgba(30, 64, 175, 0.95);
+  
+  --device-dialog-bg-1: rgba(147, 197, 253, 0.85);
+  --device-dialog-bg-2: rgba(125, 211, 252, 0.8);
+  --device-dialog-bg-3: rgba(96, 165, 250, 0.85);
+}
+
+
+/* 通用底部控制栏样式 - 适配主题 */
+.bottom-bar-content,
+.lamp-bar-content,
+.ceiling-lamp-bar-content,
+.socket-bar-content,
+.switch-bar-content,
+.router-bar-content,
+.gateway-bar-content,
+.wifi-extender-bar-content,
+.washing-machine-bar-content,
+.dryer-bar-content,
+.robot-bar-content,
+.rack-bar-content,
+.humidifier-bar-content,
+.heater-bar-content,
+.air-conditioner-bar-content {
+  background: linear-gradient(
+    135deg,
+    var(--bottom-bar-bg-1) 0%,
+    var(--bottom-bar-bg-2) 50%,
+    var(--bottom-bar-bg-3) 100%
+  ) !important;
+  border: 1px solid var(--bottom-bar-border) !important;
+}
+
+/* 通用设备弹窗样式 - 适配主题 */
+.table-lamp-dialog,
+.ceiling-lamp-dialog,
+.socket-dialog,
+.switch-dialog,
+.router-dialog,
+.gateway-dialog,
+.wifi-extender-dialog,
+.washing-machine-dialog,
+.dryer-dialog,
+.robot-vacuum-dialog,
+.clothes-rack-dialog,
+.humidifier-dialog,
+.heater-dialog,
+.air-conditioner-dialog {
+  background: linear-gradient(
+    135deg,
+    var(--device-dialog-bg-1) 0%,
+    var(--device-dialog-bg-2) 30%,
+    var(--device-dialog-bg-3) 70%,
+    var(--device-dialog-bg-2) 100%
+  ) !important;
+  border: 1px solid var(--dialog-border) !important;
+}
+
+
+/* 对话框输入框主题适配 */
+.dialog-input {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--dialog-border) !important;
+  color: var(--dialog-text) !important;
+}
+
+.theme-light .dialog-input {
+  background: rgba(255, 255, 255, 0.35) !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+.dialog-input::placeholder {
+  color: var(--dialog-text) !important;
+  opacity: 0.4 !important;
+}
+
+.dialog-input:focus {
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.theme-light .dialog-input:focus {
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.dialog-message {
+  color: var(--dialog-text) !important;
+  opacity: 0.85 !important;
+}
+
+
+/* 亮色主题的滑条和按钮样式 */
+body.theme-light .brightness-track,
+body.theme-light .color-temp-track {
+  background: rgba(15, 23, 42, 0.15) !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+}
+
+body.theme-light .brightness-fill {
+  background: linear-gradient(
+    90deg,
+    rgba(59, 130, 246, 0.8) 0%,
+    rgba(96, 165, 250, 0.85) 50%,
+    rgba(147, 197, 253, 0.9) 100%
+  ) !important;
+}
+
+body.theme-light .color-temp-thumb {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border: 2px solid rgba(15, 23, 42, 0.3) !important;
+}
+
+body.theme-light .sun-icon {
+  color: rgba(15, 23, 42, 0.7) !important;
+}
+
+body.theme-light .control-btn {
+  background: rgba(15, 23, 42, 0.1) !important;
+  color: rgba(15, 23, 42, 0.9) !important;
+}
+
+body.theme-light .control-btn:hover {
+  background: rgba(15, 23, 42, 0.15) !important;
+}
+
+body.theme-light .control-btn.active {
+  background: rgb(59, 130, 246) !important;
+  color: white !important;
+}
+
+body.theme-light .divider,
+body.theme-light .name-divider {
+  background: rgba(15, 23, 42, 0.2) !important;
+}
+
+
+/* 亮色主题的设备弹窗文字颜色 */
+body.theme-light .device-title,
+body.theme-light .device-type-label,
+body.theme-light .brightness-label,
+body.theme-light .brightness-value,
+body.theme-light .color-temp-label,
+body.theme-light .color-temp-value,
+body.theme-light .btn-label,
+body.theme-light .mode-title,
+body.theme-light .mode-btn,
+body.theme-light .device-name,
+body.theme-light .device-percentage {
+  color: rgba(30, 64, 175, 0.95) !important;
+}
+
+body.theme-light .device-type-label {
+  color: rgba(30, 64, 175, 0.65) !important;
+}
+
+/* 亮色主题的控制按钮文字 */
+body.theme-light .control-btn {
+  color: rgba(30, 64, 175, 0.9) !important;
+}
+
+body.theme-light .control-btn:hover {
+  color: rgba(30, 64, 175, 0.95) !important;
+}
+
+body.theme-light .control-btn.active {
+  color: white !important;
+}
+
+/* 亮色主题的设备状态标签 */
+body.theme-light .device-status-tag.offline {
+  color: rgba(30, 64, 175, 0.7) !important;
+}
+
+body.theme-light .device-status-tag.online {
+  color: #065f46 !important;
+  background: rgba(74, 222, 128, 0.35) !important;
+  border: 1px solid rgba(34, 197, 94, 0.5) !important;
+}
+
+/* 亮色主题的图标颜色 */
+body.theme-light .sun-icon,
+body.theme-light .brightness-icon-left,
+body.theme-light .brightness-icon-right {
+  color: rgba(30, 64, 175, 0.65) !important;
+}
+
+/* 亮色主题的按钮文字 */
+body.theme-light .btn-text {
+  color: rgba(30, 64, 175, 0.9) !important;
+}
+
+body.theme-light .control-btn.active .btn-text {
+  color: white !important;
+}
+
+/* 亮色主题的定时弹窗文字颜色 */
+body.theme-light .timer-row-label,
+body.theme-light .timer-row-value,
+body.theme-light .timer-repeat-label,
+body.theme-light .countdown-preview {
+  color: rgba(30, 64, 175, 0.9) !important;
+}
+
+body.theme-light .timer-row-value {
+  color: rgba(30, 64, 175, 0.55) !important;
+}
+
+body.theme-light .timer-row-value.active {
+  color: rgba(30, 64, 175, 0.95) !important;
+}
+
+body.theme-light .next-day {
+  color: rgba(30, 64, 175, 0.55) !important;
+}
+
+body.theme-light .timer-row-arrow {
+  color: rgba(30, 64, 175, 0.5) !important;
+}
+
+body.theme-light .timer-picker-hint {
+  color: rgba(30, 64, 175, 0.6) !important;
+}
+
+body.theme-light .wheel-item-small {
+  color: rgba(30, 64, 175, 0.4) !important;
+}
+
+body.theme-light .wheel-item-small.active {
+  color: rgba(30, 64, 175, 0.95) !important;
+}
+
+body.theme-light .wheel-item-small.faded {
+  color: rgba(30, 64, 175, 0.3) !important;
+}
+
+body.theme-light .timer-cancel {
+  color: #dc2626 !important;
+}
+
+/* 亮色主题的查看详情链接 */
+body.theme-light .socket-detail-link {
+  color: rgba(30, 64, 175, 0.85) !important;
+}
+
+body.theme-light .socket-detail-link:hover {
+  color: rgba(30, 64, 175, 0.95) !important;
 }

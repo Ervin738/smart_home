@@ -25,7 +25,7 @@ const devicesStore = useDevicesStore()
 // 除湿机模式
 const dehumidifierModes = ['智能', '睡眠', '干衣']
 const currentModeIndex = computed({
-  get: () => props.device?.dehumidifierModeIndex ?? 0,
+  get: () => (props.device as any)?.dehumidifierModeIndex ?? 0,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setDehumidifierMode(props.device.id, value)
@@ -36,10 +36,11 @@ const currentModeIndex = computed({
 // 监听设备变化，确保模式索引已初始化
 watch(() => props.device, (device) => {
   if (device) {
-    if (device.dehumidifierModeIndex === undefined) {
+    const d = device as any
+    if (d.dehumidifierModeIndex === undefined) {
       devicesStore.setDehumidifierMode(device.id, 0)
     }
-    if (device.targetHumidity === undefined) {
+    if (d.targetHumidity === undefined) {
       devicesStore.setTargetHumidity(device.id, 50)
     }
   }
@@ -47,7 +48,7 @@ watch(() => props.device, (device) => {
 
 // 目标湿度 (40-70%)
 const targetHumidity = computed({
-  get: () => props.device?.targetHumidity ?? 50,
+  get: () => (props.device as any)?.targetHumidity ?? 50,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setTargetHumidity(props.device.id, value)
@@ -60,7 +61,7 @@ const tempTargetHumidity = ref(targetHumidity.value)
 const isDragging = ref(false)
 
 // 监听设备目标湿度变化，同步临时值
-watch(() => props.device?.targetHumidity, (newValue) => {
+watch(() => (props.device as any)?.targetHumidity, (newValue) => {
   if (newValue !== undefined && !isDragging.value) {
     tempTargetHumidity.value = newValue
   }
@@ -92,12 +93,13 @@ const showDelayTimePicker = ref(false)
 // 监听设备变化，同步延时关闭状态
 watch(() => props.device, (device) => {
   if (device) {
-    if (device.status === 'offline' && device.delayShutdownEnabled) {
+    const d = device as any
+    if (device.status === 'offline' && d.delayShutdownEnabled) {
       devicesStore.setDelayShutdown(device.id, false)
     }
-    delayShutdownEnabled.value = device.delayShutdownEnabled || false
-    if (device.delayShutdownDuration) {
-      const index = delayTimeMinutes.indexOf(device.delayShutdownDuration)
+    delayShutdownEnabled.value = d.delayShutdownEnabled || false
+    if (d.delayShutdownDuration) {
+      const index = delayTimeMinutes.indexOf(d.delayShutdownDuration)
       if (index !== -1) {
         delayTimeIndex.value = index
       }
@@ -333,11 +335,9 @@ const selectDelayTime = (index: number) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -410,7 +410,7 @@ const selectDelayTime = (index: number) => {
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 14px 8px;
+  padding: 10px 8px;
   background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
   border: 1px solid rgba(120, 170, 220, 0.3);
   border-radius: 16px;
@@ -428,10 +428,8 @@ const selectDelayTime = (index: number) => {
 }
 
 .dehumidifier-power-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .dehumidifier-power-icon {
@@ -484,8 +482,8 @@ const selectDelayTime = (index: number) => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px 8px;
+  gap: 6px;
+  padding: 10px 8px;
   background: linear-gradient(135deg, rgba(70, 130, 180, 0.3) 0%, rgba(100, 150, 200, 0.25) 100%);
   border: 1px solid rgba(120, 170, 220, 0.3);
   border-radius: 16px;
@@ -503,10 +501,8 @@ const selectDelayTime = (index: number) => {
 }
 
 .mode-select-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .mode-select-btn:disabled {
@@ -628,7 +624,7 @@ const selectDelayTime = (index: number) => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
+  background: var(--dialog-btn-active-bg-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -636,7 +632,7 @@ const selectDelayTime = (index: number) => {
   font-weight: 600;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(38, 208, 206, 0.4);
+  box-shadow: 0 4px 16px var(--dialog-btn-active-shadow);
   z-index: 10;
   transition: left 0.15s ease-out;
   text-shadow: 
@@ -655,12 +651,12 @@ const selectDelayTime = (index: number) => {
   top: 0;
   left: 0;
   height: 100%;
-  background: linear-gradient(90deg, #26d0ce 0%, #1fa19f 100%);
+  background: var(--dialog-btn-active-bg-1);
   border-radius: 22px;
   transition: width 0.15s ease-out;
   pointer-events: none;
   box-shadow:
-    0 0 20px rgba(38, 208, 206, 0.5),
+    0 0 20px var(--dialog-btn-active-shadow),
     inset 0 1px 2px rgba(255, 255, 255, 0.6);
 }
 
@@ -703,12 +699,12 @@ const selectDelayTime = (index: number) => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
+  background: var(--dialog-btn-active-bg-1);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(38, 208, 206, 0.3);
+  box-shadow: 0 4px 16px var(--dialog-btn-active-shadow);
 }
 
 .delay-icon {
@@ -765,9 +761,9 @@ const selectDelayTime = (index: number) => {
 }
 
 .delay-toggle input:checked + .toggle-slider {
-  background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
-  border-color: rgba(38, 208, 206, 0.4);
-  box-shadow: 0 0 12px rgba(38, 208, 206, 0.4);
+  background: var(--dialog-btn-active-bg-1);
+  border-color: var(--dialog-btn-active-border);
+  box-shadow: 0 0 12px var(--dialog-btn-active-shadow);
 }
 
 .delay-toggle input:checked + .toggle-slider:before {
@@ -811,11 +807,9 @@ const selectDelayTime = (index: number) => {
 .time-picker-dialog {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -860,16 +854,15 @@ const selectDelayTime = (index: number) => {
 }
 
 .time-option.active {
-  background: linear-gradient(135deg, #26d0ce 0%, #1fa19f 100%);
-  border-color: rgba(38, 208, 206, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(38, 208, 206, 0.4);
+  border-color: transparent;
 }
 
 .time-option.active:hover {
-  background: linear-gradient(135deg, #30e0de 0%, #29b1af 100%);
+  background: var(--dialog-btn-active-bg-1);
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(38, 208, 206, 0.5);
+  box-shadow: 0 6px 24px var(--dialog-btn-active-shadow);
 }
 
 /* 弹窗动画 */

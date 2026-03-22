@@ -4,17 +4,44 @@
  */
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
+import { watch } from 'vue'
+
+// 按需导入 Element Plus 样式和组件
+import { setupElementPlus } from '@/plugins/element-plus'
 
 import App from './App.vue'
 import router from './router'
-import './style.css'
+import '@/style.css'
+import { useThemeStore } from '@/stores/theme'
+import { useTabsStore } from '@/features/layout/tabs'
 
+const pinia = createPinia()
 const app = createApp(App)
 
-app.use(createPinia())
+app.use(pinia)
 app.use(router)
-app.use(ElementPlus)
+setupElementPlus(app)
 
 app.mount('#app')
+
+// 初始化默认房间
+const tabsStore = useTabsStore()
+if (tabsStore.tabs.length === 0) {
+  tabsStore.addTab('客厅')
+  tabsStore.addTab('卧室')
+  tabsStore.addTab('厨房')
+}
+
+// 监听主题变化，切换 body 的 class
+const themeStore = useThemeStore()
+watch(
+  () => themeStore.currentTheme?.isDark,
+  (isDark) => {
+    if (isDark) {
+      document.body.classList.remove('theme-light')
+    } else {
+      document.body.classList.add('theme-light')
+    }
+  },
+  { immediate: true }
+)

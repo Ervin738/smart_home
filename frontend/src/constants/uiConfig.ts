@@ -29,27 +29,3 @@ export const SLIDER_CONFIG = {
   /** 滚轮触发阈值（像素） */
   WHEEL_THRESHOLD: 10
 } as const
-
-// 动画配置
-export const ANIMATION_CONFIG = {
-  /** 标准过渡时间（毫秒） */
-  TRANSITION_DURATION: 300,
-  
-  /** 快速过渡时间（毫秒） */
-  FAST_TRANSITION: 200,
-  
-  /** 慢速过渡时间（毫秒） */
-  SLOW_TRANSITION: 500
-} as const
-
-// 设备状态
-export const DEVICE_STATUS = {
-  ONLINE: 'online',
-  OFFLINE: 'offline'
-} as const
-
-// 定时器类型
-export const TIMER_TYPE = {
-  ON: 'on',
-  OFF: 'off'
-} as const

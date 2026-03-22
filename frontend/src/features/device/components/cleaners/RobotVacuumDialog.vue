@@ -4,8 +4,9 @@
   触发：长按扫地机器人设备卡片
 -->
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 import { useRobotControl, useVerticalSlider } from '@/features/device/composables'
 import { INTERACTION_TIMING } from '@/constants'
 
@@ -22,41 +23,17 @@ const emit = defineEmits<{
   (e: 'update:mode', index: number): void
 }>()
 
-const activeModeIndex = ref(-1)
+const devicesStore = useDevicesStore()
 const activeControlIndex = ref(-1)
-const isCleaning = ref(false)
 
-// 当设备改变时，恢复该设备的状态
-watch(() => props.device?.id, (newId) => {
-  if (newId && props.device) {
-    const device = props.device as any
-    activeModeIndex.value = device.robotModeIndex ?? -1
-    isCleaning.value = device.robotIsCleaning ?? false
-  }
+const activeModeIndex = computed({
+  get: () => (props.device as any)?.robotModeIndex ?? -1,
+  set: (index: number) => { if (props.device) devicesStore.setDeviceExtra(props.device.id, { robotModeIndex: index }) }
 })
 
-// 当状态改变时，同步到设备对象
-watch(activeModeIndex, (newIndex) => {
-  if (props.device) {
-    const device = props.device as any
-    device.robotModeIndex = newIndex
-  }
-})
-
-watch(isCleaning, (newValue) => {
-  if (props.device) {
-    const device = props.device as any
-    device.robotIsCleaning = newValue
-  }
-})
-
-// 初始化时恢复状态
-watch(() => props.visible, (visible) => {
-  if (visible && props.device) {
-    const device = props.device as any
-    activeModeIndex.value = device.robotModeIndex ?? -1
-    isCleaning.value = device.robotIsCleaning ?? false
-  }
+const isCleaning = computed({
+  get: () => (props.device as any)?.robotIsCleaning ?? false,
+  set: (v: boolean) => { if (props.device) devicesStore.setDeviceExtra(props.device.id, { robotIsCleaning: v }) }
 })
 
 // 使用扫地机器人控制
@@ -68,6 +45,23 @@ const {
   adjustSuction,
   adjustWater
 } = useRobotControl()
+
+// 弹窗显示或设备切换时恢复吸力/水量档位
+watch(() => [props.visible, props.device?.id], () => {
+  if (props.visible && props.device) {
+    const d = props.device as any
+    robotSuctionLevel.value = d.robotSuctionLevel ?? 1
+    robotWaterLevel.value = d.robotWaterLevel ?? 1
+  }
+}, { immediate: true })
+
+// 档位变化时持久化
+watch(robotSuctionLevel, (val) => {
+  if (props.device) devicesStore.setDeviceExtra(props.device.id, { robotSuctionLevel: val })
+})
+watch(robotWaterLevel, (val) => {
+  if (props.device) devicesStore.setDeviceExtra(props.device.id, { robotWaterLevel: val })
+})
 
 // 使用滑动控制
 const suctionSlider = useVerticalSlider(adjustSuction)
@@ -87,15 +81,9 @@ const handleModeSelect = (index: number) => {
 }
 
 watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    activeModeIndex.value = -1
+  if (newStatus === 'offline' && props.device) {
     activeControlIndex.value = -1
-    isCleaning.value = false
-    if (props.device) {
-      const device = props.device as any
-      device.robotModeIndex = -1
-      device.robotIsCleaning = false
-    }
+    devicesStore.setDeviceExtra(props.device.id, { robotModeIndex: -1, robotIsCleaning: false })
   }
 }, { flush: 'post' })
 
@@ -106,9 +94,7 @@ const handleCharge = () => {
   activeModeIndex.value = -1
   emit('charge')
   setTimeout(() => {
-    if (activeControlIndex.value === 1) {
-      activeControlIndex.value = -1
-    }
+    if (activeControlIndex.value === 1) activeControlIndex.value = -1
   }, INTERACTION_TIMING.CHARGE_DELAY)
 }
 
@@ -274,11 +260,9 @@ const handleToggleCleaning = () => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -360,10 +344,8 @@ const handleToggleCleaning = () => {
 }
 
 .power-control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.7) 0%, rgba(79, 172, 254, 0.6) 100%);
-  border-color: rgba(59, 130, 246, 0.5);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
 }
 
 .power-control-btn .btn-icon {
@@ -407,16 +389,12 @@ const handleToggleCleaning = () => {
 }
 
 .control-btn.power-on {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .control-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
 }
 
@@ -489,10 +467,8 @@ const handleToggleCleaning = () => {
 }
 
 .robot-mode-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .robot-mode-icon {

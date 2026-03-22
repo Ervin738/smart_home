@@ -28,7 +28,7 @@ const indoorHumidity = ref(59)
 
 // 空调设置温度 - 使用计算属性从设备获取
 const targetTemp = computed({
-  get: () => props.device?.targetTemp ?? 26,
+  get: () => (props.device as any)?.targetTemp ?? 26,
   set: (value: number) => {
     if (props.device) {
       devicesStore.setTargetTemp(props.device.id, value)
@@ -39,7 +39,7 @@ const targetTemp = computed({
 // 空调模式
 const acModes = ['制冷', '制热', '除湿']
 const currentModeIndex = computed({
-  get: () => props.device?.acModeIndex ?? null,
+  get: () => (props.device as any)?.acModeIndex ?? null,
   set: (value: number | null) => {
     if (props.device) {
       devicesStore.setAcMode(props.device.id, value)
@@ -49,14 +49,26 @@ const currentModeIndex = computed({
 
 // 风速档位
 const fanSpeeds = ['风速1', '风速2', '风速3', '自动']
-const currentFanSpeed = ref(1) // 默认风速2
-const isAutoMode = ref(false) // 是否为自动模式
 
-// 按钮选中状态
-const selectedFunctions = ref<string[]>([])
+const currentFanSpeed = computed({
+  get: () => (props.device as any)?.acFanSpeed ?? 1,
+  set: (v: number) => { if (props.device) devicesStore.setAcFanSpeed(props.device.id, v) }
+})
 
-// 风向模式（扫风、防直吹、定向扫只能选一个）
-const windMode = ref<string | null>(null)
+const isAutoMode = computed({
+  get: () => (props.device as any)?.acAutoMode ?? false,
+  set: (v: boolean) => { if (props.device) devicesStore.setAcAutoMode(props.device.id, v) }
+})
+
+const selectedFunctions = computed({
+  get: () => (props.device as any)?.acFunctions ?? [] as string[],
+  set: (v: string[]) => { if (props.device) devicesStore.setAcFunctions(props.device.id, v) }
+})
+
+const windMode = computed({
+  get: () => (props.device as any)?.acWindMode ?? null as string | null,
+  set: (v: string | null) => { if (props.device) devicesStore.setAcWindMode(props.device.id, v) }
+})
 
 // 切换空调模式
 const toggleAcMode = () => {
@@ -83,10 +95,8 @@ const increaseTemp = () => {
 // 切换自动模式
 const toggleAutoMode = () => {
   isAutoMode.value = !isAutoMode.value
-  
   if (isAutoMode.value) {
-    // 开启自动模式，随机选择一个风速档位
-    currentFanSpeed.value = Math.floor(Math.random() * 3) // 随机0-2
+    currentFanSpeed.value = Math.floor(Math.random() * 3)
   }
 }
 
@@ -97,23 +107,16 @@ const toggleFanSpeed = () => {
 
 // 切换功能选择（多选）
 const toggleFunction = (func: string) => {
-  const index = selectedFunctions.value.indexOf(func)
-  if (index > -1) {
-    selectedFunctions.value.splice(index, 1)
-  } else {
-    selectedFunctions.value.push(func)
-  }
+  const arr = [...selectedFunctions.value]
+  const index = arr.indexOf(func)
+  if (index > -1) arr.splice(index, 1)
+  else arr.push(func)
+  selectedFunctions.value = arr
 }
 
 // 切换风向模式（单选）
 const toggleWindMode = (mode: string) => {
-  if (windMode.value === mode) {
-    // 如果点击的是当前激活的模式，则取消选中
-    windMode.value = null
-  } else {
-    // 否则切换到新模式
-    windMode.value = mode
-  }
+  windMode.value = windMode.value === mode ? null : mode
 }
 
 // 监听设备状态变化，关机时清除所有选中状态
@@ -121,8 +124,8 @@ watch(() => props.device?.status, (newStatus) => {
   if (newStatus === 'offline') {
     selectedFunctions.value = []
     windMode.value = null
-    // 关闭自动模式
     isAutoMode.value = false
+    currentModeIndex.value = null
   }
 })
 </script>
@@ -386,11 +389,9 @@ watch(() => props.device?.status, (newStatus) => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -483,10 +484,8 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .ac-power-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .ac-power-btn.disabled {
@@ -648,12 +647,7 @@ watch(() => props.device?.status, (newStatus) => {
   top: 0;
   left: 0;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    rgba(59, 130, 246, 0.9) 0%,
-    rgba(79, 172, 254, 0.95) 50%,
-    rgba(99, 192, 255, 1) 100%
-  );
+  background: var(--dialog-btn-active-bg-1);
   border-radius: 20px;
   transition: width 0.15s ease;
   pointer-events: none;
@@ -690,12 +684,7 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .auto-btn.active {
-  background: linear-gradient(
-    90deg,
-    rgba(59, 130, 246, 0.9) 0%,
-    rgba(79, 172, 254, 0.95) 50%,
-    rgba(99, 192, 255, 1) 100%
-  );
+  background: var(--dialog-btn-active-bg-1);
   color: white;
 }
 
@@ -806,10 +795,8 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .function-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .function-btn.disabled {

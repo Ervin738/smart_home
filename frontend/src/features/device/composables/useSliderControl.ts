@@ -1,5 +1,36 @@
 /**
  * 滑动控制相关的组合式函数
+ * 
+ * 功能：提供通用的滑动交互逻辑
+ * 
+ * 使用场景：
+ * - 任何需要垂直滑动控制的组件
+ * - 设备对话框中的滑动调节（亮度、温度、音量等）
+ * - 可复用的 UI 交互逻辑
+ * 
+ * 特点：
+ * - 支持鼠标拖拽和触摸滑动
+ * - 支持鼠标滚轮控制
+ * - 可配置的触发阈值
+ * - 防抖处理，避免频繁触发
+ * 
+ * @example
+ * ```typescript
+ * const { isDragging, onDragStart, onDragMove, onDragEnd, onWheel } = useVerticalSlider(
+ *   (delta) => {
+ *     // delta: 1 表示向上，-1 表示向下
+ *     brightness.value = Math.max(0, Math.min(100, brightness.value + delta * 5))
+ *   }
+ * )
+ * 
+ * // 在模板中使用
+ * <div
+ *   @mousedown="onDragStart"
+ *   @mousemove="onDragMove"
+ *   @mouseup="onDragEnd"
+ *   @wheel="onWheel"
+ * >
+ * ```
  */
 import { ref } from 'vue'
 import { SLIDER_CONFIG } from '@/constants/uiConfig'

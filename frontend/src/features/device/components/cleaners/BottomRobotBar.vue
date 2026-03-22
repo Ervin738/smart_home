@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 
 const props = defineProps<{
   visible: boolean
@@ -19,23 +20,27 @@ const emit = defineEmits<{
   (e: 'select-mode', mode: string): void
 }>()
 
-const selectedModeIndex = ref(-1)
+const store = useDevicesStore()
 const isCharging = ref(false)
-const isCleaning = ref(false)
-
 const modes = ['扫地', '拖地', '边扫边拖', '先扫后拖']
 
-const canOperate = computed(() => {
-  return props.device?.status === 'online'
+const selectedModeIndex = computed({
+  get: () => (props.device as any)?.robotModeIndex ?? -1,
+  set: (index: number) => { if (props.device) store.setDeviceExtra(props.device.id, { robotModeIndex: index }) }
 })
+
+const isCleaning = computed({
+  get: () => (props.device as any)?.robotIsCleaning ?? false,
+  set: (v: boolean) => { if (props.device) store.setDeviceExtra(props.device.id, { robotIsCleaning: v }) }
+})
+
+const canOperate = computed(() => props.device?.status === 'online')
 
 const handleModeSelect = (index: number) => {
   if (!canOperate.value) return
   selectedModeIndex.value = index
   const mode = modes[index]
-  if (mode) {
-    emit('select-mode', mode)
-  }
+  if (mode) emit('select-mode', mode)
 }
 
 const handleGoCharge = () => {
@@ -43,9 +48,7 @@ const handleGoCharge = () => {
   isCleaning.value = false
   selectedModeIndex.value = -1
   emit('go-charge')
-  setTimeout(() => {
-    isCharging.value = false
-  }, 2000)
+  setTimeout(() => { isCharging.value = false }, 2000)
 }
 
 const handleToggleCleaning = () => {
@@ -54,50 +57,9 @@ const handleToggleCleaning = () => {
   emit('toggle-cleaning')
 }
 
-// 当设备改变时，恢复该设备的状态
-watch(() => props.device?.id, (newId) => {
-  if (newId && props.device) {
-    const device = props.device as any
-    selectedModeIndex.value = device.robotModeIndex ?? -1
-    isCleaning.value = device.robotIsCleaning ?? false
-    isCharging.value = false
-  }
-})
-
-// 当状态改变时，同步到设备对象
-watch(selectedModeIndex, (newIndex) => {
-  if (props.device) {
-    const device = props.device as any
-    device.robotModeIndex = newIndex
-  }
-})
-
-watch(isCleaning, (newValue) => {
-  if (props.device) {
-    const device = props.device as any
-    device.robotIsCleaning = newValue
-  }
-})
-
-// 初始化时恢复状态
-watch(() => props.visible, (visible) => {
-  if (visible && props.device) {
-    const device = props.device as any
-    selectedModeIndex.value = device.robotModeIndex ?? -1
-    isCleaning.value = device.robotIsCleaning ?? false
-  }
-})
-
-// 关闭电源时取消模式选择和清扫状态
 watch(() => props.device?.status, (newStatus) => {
-  if (newStatus === 'offline') {
-    selectedModeIndex.value = -1
-    isCleaning.value = false
-    if (props.device) {
-      const device = props.device as any
-      device.robotModeIndex = -1
-      device.robotIsCleaning = false
-    }
+  if (newStatus === 'offline' && props.device) {
+    store.setDeviceExtra(props.device.id, { robotModeIndex: -1, robotIsCleaning: false })
   }
 })
 </script>
@@ -184,9 +146,9 @@ watch(() => props.device?.status, (newStatus) => {
   padding: 12px 16px;
   background: linear-gradient(
     135deg,
-    rgba(30, 40, 60, 0.95) 0%,
-    rgba(40, 55, 80, 0.95) 50%,
-    rgba(50, 70, 100, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -220,7 +182,7 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .control-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   border-radius: 16px;
   color: white;
@@ -284,7 +246,7 @@ watch(() => props.device?.status, (newStatus) => {
 }
 
 .mode-btn.active {
-  background: rgb(59, 130, 246);
+  background: var(--bottom-bar-active-bg);
   border: none;
   color: white;
 }

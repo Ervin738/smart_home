@@ -6,6 +6,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import type { Device } from '@/features/device/store/devices.store'
+import { useDevicesStore } from '@/features/device/store/devices.store'
 import { useClothesRackControl } from '@/features/device/composables'
 import { INTERACTION_TIMING } from '@/constants'
 
@@ -20,10 +21,10 @@ const emit = defineEmits<{
   (e: 'update:mode', index: number): void
 }>()
 
+const devicesStore = useDevicesStore()
 const activeModeIndex = ref(-1)
 const activeModes = ref<number[]>([])
 
-// 使用晾衣架控制
 const {
   lighting: clothesRackLighting,
   drying: clothesRackDrying,
@@ -37,15 +38,25 @@ const modeOptions = ['风干', '烘干', '消毒', '照明']
 const handleModeSelect = (index: number) => {
   if (!props.device || props.device.status === 'offline') return
   const modeIndex = activeModes.value.indexOf(index)
-  if (modeIndex > -1) {
-    // 如果已选中，则取消选中
-    activeModes.value.splice(modeIndex, 1)
-  } else {
-    // 如果未选中，则添加选中
-    activeModes.value.push(index)
-  }
+  const newModes = [...activeModes.value]
+  if (modeIndex > -1) newModes.splice(modeIndex, 1)
+  else newModes.push(index)
+  activeModes.value = newModes
+  devicesStore.setDeviceExtra(props.device.id, { rackActiveModes: newModes })
   emit('update:mode', index)
 }
+
+watch(() => props.device?.id, (newId) => {
+  if (newId && props.device) {
+    activeModes.value = (props.device as any).rackActiveModes ?? []
+  }
+})
+
+watch(() => props.visible, (visible) => {
+  if (visible && props.device) {
+    activeModes.value = (props.device as any).rackActiveModes ?? []
+  }
+})
 
 watch(() => props.device?.status, (newStatus) => {
   if (newStatus === 'offline') {
@@ -187,11 +198,9 @@ const handleClothesRackStop = () => {
 .dialog-content {
   background: linear-gradient(
     180deg,
-    rgba(13, 13, 26, 0.95) 0%,
-    rgba(26, 26, 46, 0.95) 25%,
-    rgba(42, 58, 90, 0.95) 50%,
-    rgba(58, 90, 122, 0.95) 75%,
-    rgba(58, 106, 154, 0.95) 100%
+    var(--dialog-bg-1) 0%,
+    var(--dialog-bg-2) 50%,
+    var(--dialog-bg-3) 100%
   );
   border-radius: 24px;
   padding: 24px;
@@ -281,10 +290,8 @@ const handleClothesRackStop = () => {
 }
 
 .rack-power-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .rack-power-icon {
@@ -333,10 +340,8 @@ const handleClothesRackStop = () => {
 }
 
 .rack-lift-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .rack-lift-btn.disabled {
@@ -402,10 +407,8 @@ const handleClothesRackStop = () => {
 }
 
 .rack-function-btn.active {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.6) 0%, rgba(79, 172, 254, 0.5) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
+  background: var(--dialog-btn-active-bg-1);
   color: white;
-  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
 }
 
 .rack-function-btn.disabled {
