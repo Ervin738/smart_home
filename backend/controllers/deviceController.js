@@ -1,3 +1,4 @@
+// 设备控制器 - 实现设备列表查询、创建、更新、删除及排序逻辑
 const Device = require('../models/Device');
 
 async function getAllDevices(req, res) {

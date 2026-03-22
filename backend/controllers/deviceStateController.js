@@ -1,3 +1,4 @@
+// 设备状态控制器 - 负责各设备子类型状态的读取与持久化，处理驼峰/下划线字段映射
 const { getDeviceState, upsertDeviceState, DEVICE_STATE_SCHEMAS } = require('../models/DeviceState')
 const Device = require('../models/Device')
 

@@ -1,3 +1,4 @@
+// 场景路由 - 处理场景的查询、创建及触发接口
 const { Router } = require('express');
 const { getAllScenes, createScene, triggerScene } = require('../controllers/sceneController');
 

@@ -1,3 +1,4 @@
+// 数据库工具 - 创建 MySQL 连接池，提供统一的 query 查询方法
 const mysql = require('mysql2/promise');
 require('dotenv').config();
 
@@ -11,10 +12,10 @@ const pool = mysql.createPool({
 });
 
 /**
- * Execute a SQL query using the connection pool.
+ * 使用连接池执行 SQL 查询
  * @param {string} sql
  * @param {Array} params
- * @returns {Promise<Array>} rows
+ * @returns {Promise<Array>} 查询结果行数组
  */
 async function query(sql, params = []) {
   const [rows] = await pool.execute(sql, params);

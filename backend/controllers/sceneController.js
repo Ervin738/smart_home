@@ -1,3 +1,4 @@
+// 场景控制器 - 实现场景查询、创建及触发（联动设备状态变更与 MQTT 指令下发）
 const Scene = require('../models/Scene');
 const { applySceneRules } = require('../simulation/simulationService');
 const { publishControl } = require('../utils/mqttService');

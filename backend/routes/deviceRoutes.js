@@ -1,3 +1,4 @@
+// 设备路由 - 处理设备的增删改查及排序接口
 const { Router } = require('express');
 const { getAllDevices, createDevice, updateDevice, deleteDevice, reorderDevices } = require('../controllers/deviceController');
 

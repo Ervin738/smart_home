@@ -1,3 +1,4 @@
+// 设备状态路由 - 处理设备子类型状态的读取与更新接口
 const express = require('express')
 const router = express.Router({ mergeParams: true })
 const { getState, updateState } = require('../controllers/deviceStateController')

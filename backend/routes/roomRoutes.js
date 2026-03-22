@@ -1,3 +1,4 @@
+// 房间路由 - 处理房间的增删改查及排序接口
 const { Router } = require('express');
 const { getAllRooms, createRoom, updateRoom, deleteRoom, reorderRooms } = require('../controllers/roomController');
 

@@ -1,3 +1,4 @@
+// 设备状态模型 - 为每种设备子类型维护独立状态表，提供 UPSERT/查询/删除操作
 const { query } = require('../utils/db')
 
 /**

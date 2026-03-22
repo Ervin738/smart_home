@@ -1,3 +1,4 @@
+// 房间控制器 - 实现房间的增删改查、排序及 Socket.IO 实时广播
 const Room = require('../models/Room');
 
 async function getAllRooms(req, res) {

@@ -1,6 +1,7 @@
+// 设备模拟器 - 维护设备内存状态，模拟 AC 温度变化和窗帘移动，并通过 MQTT/Socket.IO 推送状态更新
 const Device = require('../models/Device');
 
-// Default initial states per device type
+// 各设备类型的默认初始状态
 const DEFAULT_STATE = {
   tv:      { power: false, channel: 1, volume: 20 },
   ac:      { power: false, mode: 'cool', targetTemp: 26, currentTemp: 30 },
@@ -9,25 +10,17 @@ const DEFAULT_STATE = {
   camera:  { power: false, recording: false, motion: false },
 };
 
-// Fault simulation config
-const FAULT_CONFIG = {
-  offlineProb:       0.001,  // probability per tick that a device goes offline
-  reconnectMinMs:    5000,   // minimum offline duration before reconnect
-  reconnectMaxMs:    15000,  // maximum offline duration before reconnect
-  stateResetProb:    0.3,    // probability that state is lost (reset to default) on reconnect
-};
-
 class DeviceSimulator {
   constructor() {
     this.devices = new Map();
     this._timer  = null;
     this._io     = null;
-    this._mqtt   = null; // mqttService reference
+    this._mqtt   = null; // mqttService 引用
   }
 
-  // ─── Initialisation ────────────────────────────────────────────────────────
+  // ─── 初始化 ────────────────────────────────────────────────────────────────
 
-  /** Load all devices from DB into memory */
+  /** 从数据库加载所有设备到内存 */
   async load() {
     const rows = await Device.findAll();
     for (const row of rows) {
@@ -45,57 +38,7 @@ class DeviceSimulator {
     console.log(`[Simulator] Loaded ${this.devices.size} device(s).`);
   }
 
-  // ─── Fault simulation ──────────────────────────────────────────────────────
-
-  /**
-   * Randomly trigger offline, and handle reconnect timing.
-   * Returns true if the device state changed (went offline or came back).
-   */
-  _tickFault(device) {
-    const now = Date.now();
-
-    // Already offline — check if it's time to reconnect
-    if (device.offline) {
-      if (now - device._offlineSince >= device._reconnectDelay) {
-        device.offline = false;
-        delete device._offlineSince;
-        delete device._reconnectDelay;
-
-        // Simulate state inconsistency: device may lose its state on reconnect
-        if (Math.random() < FAULT_CONFIG.stateResetProb) {
-          device.status = { ...(DEFAULT_STATE[device.type] ?? {}) };
-          console.log(`[Simulator] Device ${device.id} reconnected with state reset.`);
-        } else {
-          console.log(`[Simulator] Device ${device.id} reconnected, state preserved.`);
-        }
-
-        this._io?.emit('device:reconnected', {
-          deviceId: device.id,
-          status:   { ...device.status },
-        });
-        if (this._mqtt) this._mqtt.publishStatus(device.id, device.status);
-        return true;
-      }
-      return false; // still offline, nothing to do
-    }
-
-    // Online — randomly go offline
-    if (Math.random() < FAULT_CONFIG.offlineProb) {
-      device.offline = true;
-      device._offlineSince  = now;
-      device._reconnectDelay =
-        FAULT_CONFIG.reconnectMinMs +
-        Math.random() * (FAULT_CONFIG.reconnectMaxMs - FAULT_CONFIG.reconnectMinMs);
-
-      console.log(`[Simulator] Device ${device.id} went offline. Will reconnect in ~${Math.round(device._reconnectDelay / 1000)}s`);
-      this._io?.emit('device:offline', { deviceId: device.id });
-      return true;
-    }
-
-    return false;
-  }
-
-  // ─── Tick logic per device type ────────────────────────────────────────────
+  // ─── 各设备类型的 Tick 逻辑 ────────────────────────────────────────────────
 
   _tickAc(device) {
     const s = device.status;
@@ -104,7 +47,7 @@ class DeviceSimulator {
     const diff = s.targetTemp - s.currentTemp;
     if (Math.abs(diff) < 0.1) return false;
 
-    // Move currentTemp 0.2°C per tick toward targetTemp
+    // 每次 tick 向目标温度移动 0.2°C
     s.currentTemp = parseFloat(
       (s.currentTemp + Math.sign(diff) * 0.2).toFixed(2)
     );
@@ -116,26 +59,22 @@ class DeviceSimulator {
     const target = s.open ? 100 : 0;
     if (s.position === target) return false;
 
-    // Move 5% per tick
+    // 每次 tick 移动 5%
     const step = s.open ? 5 : -5;
     s.position = Math.min(100, Math.max(0, s.position + step));
     return true;
   }
 
-  /** Run one simulation tick across all devices */
+  /** 对所有设备执行一次模拟 tick */
   _tick() {
     for (const device of this.devices.values()) {
-      // Run fault simulation first; skip normal tick if device is offline
-      const faultChanged = this._tickFault(device);
-      if (device.offline) continue;
-
       let changed = false;
 
       if (device.type === 'ac')      changed = this._tickAc(device);
       if (device.type === 'curtain') changed = this._tickCurtain(device);
 
       if (changed) {
-        // Persist to DB
+        // 持久化到数据库
         Device.update(device.id, {
           name:     device.name,
           type:     device.type,
@@ -160,13 +99,13 @@ class DeviceSimulator {
     }
   }
 
-  // ─── Public API ────────────────────────────────────────────────────────────
+  // ─── 公共 API ──────────────────────────────────────────────────────────────
 
   /**
-   * Start the simulation loop.
-   * @param {object} io       - Socket.IO instance
-   * @param {object} mqtt     - mqttService instance
-   * @param {number} interval - Tick interval in ms (default 1000)
+   * 启动模拟循环
+   * @param {object} io       - Socket.IO 实例
+   * @param {object} mqtt     - mqttService 实例
+   * @param {number} interval - tick 间隔毫秒数（默认 1000）
    */
   start(io = null, mqtt = null, interval = 1000) {
     if (this._timer) return;
@@ -185,22 +124,16 @@ class DeviceSimulator {
   }
 
   /**
-   * Apply a control action to a device.
+   * 对设备应用控制指令
    * @param {number} deviceId
-   * @param {object} action  - Partial status fields to merge, e.g. { power: true, volume: 30 }
-   * @returns {object|null}  Updated status, or null if device not found
+   * @param {object} action  - 要合并的状态字段，如 { power: true, volume: 30 }
+   * @returns {object|null}  更新后的状态，设备不存在时返回 null
    */
   updateState(deviceId, action) {
     const device = this.devices.get(Number(deviceId));
     if (!device) return null;
 
-    // Reject commands while device is offline
-    if (device.offline) {
-      console.warn(`[Simulator] Command rejected: device ${deviceId} is offline.`);
-      return { _offline: true };
-    }
-
-    // Validate type-specific constraints
+    // 校验各设备类型的约束条件
     const s = device.status;
     const merged = { ...s, ...action };
 
@@ -213,13 +146,13 @@ class DeviceSimulator {
       if (!['cool', 'heat', 'fan', 'auto'].includes(merged.mode)) merged.mode = s.mode;
     }
     if (device.type === 'curtain') {
-      // Derive position target from open flag
-      if (action.open !== undefined) merged.position = s.position; // let tick handle movement
+      // 由 open 标志推导目标位置，实际移动交给 tick 处理
+      if (action.open !== undefined) merged.position = s.position;
     }
 
     device.status = merged;
 
-    // Persist immediately
+    // 立即持久化到数据库
     Device.update(deviceId, {
       name:     device.name,
       type:     device.type,
@@ -230,7 +163,7 @@ class DeviceSimulator {
   }
 
   /**
-   * Register a newly created device into the simulator at runtime.
+   * 运行时注册新创建的设备到模拟器
    * @param {{ id, name, type, status }} device
    */
   register(device) {
@@ -244,7 +177,7 @@ class DeviceSimulator {
   }
 
   /**
-   * Remove a device from the simulator.
+   * 从模拟器中移除设备
    * @param {number} deviceId
    */
   unregister(deviceId) {
@@ -252,26 +185,25 @@ class DeviceSimulator {
   }
 
   /**
-   * Get current in-memory status of a device.
+   * 获取设备当前内存状态
    * @param {number} deviceId
    * @returns {object|null}
    */
   getDeviceStatus(deviceId) {
     const device = this.devices.get(Number(deviceId));
-    return device ? { ...device.status, offline: device.offline ?? false } : null;
+    return device ? { ...device.status } : null;
   }
 
-  /** Return all device states as a plain array */
+  /** 以数组形式返回所有设备状态 */
   getAllStatuses() {
     return Array.from(this.devices.values()).map(d => ({
-      id:      d.id,
-      name:    d.name,
-      type:    d.type,
-      offline: d.offline ?? false,
-      status:  { ...d.status },
+      id:     d.id,
+      name:   d.name,
+      type:   d.type,
+      status: { ...d.status },
     }));
   }
 }
 
-// Export a singleton instance
+// 导出单例
 module.exports = new DeviceSimulator();

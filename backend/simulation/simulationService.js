@@ -1,17 +1,13 @@
-/**
- * Scene execution service.
- * Delegates state changes to the DeviceSimulator singleton so all updates
- * go through the same in-memory state machine and are persisted consistently.
- *
- * Each rule shape: { deviceId: number, status: object }
- */
+// 场景执行服务 - 批量应用场景规则，委托模拟器更新设备状态并记录操作日志
+// 所有状态变更通过 DeviceSimulator 单例处理，保证内存状态与数据库一致
+// 规则格式：{ deviceId: number, status: object }
 const simulator = require('./deviceSimulator');
 const Log = require('../models/Log');
 
 /**
- * @param {Array}  rules  - Array of { deviceId, status }
- * @param {object} io     - Socket.IO server instance (optional)
- * @returns {Promise<Array>} results
+ * @param {Array}  rules  - 规则数组，每项格式 { deviceId, status }
+ * @param {object} io     - Socket.IO 实例（可选）
+ * @returns {Promise<Array>} 执行结果数组
  */
 async function applySceneRules(rules, io = null) {
   const results = [];
@@ -22,10 +18,6 @@ async function applySceneRules(rules, io = null) {
     const updated = simulator.updateState(deviceId, status);
     if (!updated) {
       results.push({ deviceId, success: false, error: 'Device not found' });
-      continue;
-    }
-    if (updated._offline) {
-      results.push({ deviceId, success: false, error: 'Device is offline' });
       continue;
     }
 

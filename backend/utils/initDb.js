@@ -1,3 +1,4 @@
+// 数据库初始化 - 按依赖顺序创建所有数据表
 const Device = require('../models/Device');
 const Scene = require('../models/Scene');
 const Log = require('../models/Log');

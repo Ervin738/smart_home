@@ -1,9 +1,10 @@
+// Socket.IO 服务 - 初始化 WebSocket 服务，向前端实时推送设备状态变更
 const { Server } = require('socket.io');
 
 let io = null;
 
 /**
- * Initialise Socket.IO on the given HTTP server.
+ * 在指定 HTTP 服务器上初始化 Socket.IO
  * @param {import('http').Server} httpServer
  * @returns {import('socket.io').Server}
  */
@@ -23,9 +24,9 @@ function init(httpServer) {
   return io;
 }
 
-/** Return the existing io instance (must call init first). */
+/** 返回已初始化的 io 实例（需先调用 init）*/
 function getIo() {
-  if (!io) throw new Error('Socket.IO not initialised. Call init() first.');
+  if (!io) throw new Error('Socket.IO 未初始化，请先调用 init()。');
   return io;
 }
 

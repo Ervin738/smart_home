@@ -1,3 +1,4 @@
+// 设备模型 - 定义 devices 表结构及基础 CRUD 操作
 const { query } = require('../utils/db');
 
 const CREATE_TABLE = `

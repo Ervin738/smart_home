@@ -1,3 +1,4 @@
+// 日志模型 - 定义 logs 表结构，记录设备操作行为
 const { query } = require('../utils/db');
 
 const CREATE_TABLE = `

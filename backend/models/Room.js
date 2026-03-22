@@ -1,3 +1,4 @@
+// 房间模型 - 定义 rooms 表结构，支持平面图坐标及排序字段的动态迁移
 const { query } = require('../utils/db');
 
 const CREATE_TABLE = `

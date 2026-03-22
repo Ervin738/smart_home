@@ -1,3 +1,4 @@
+// 场景模型 - 定义 scenes 表结构及基础 CRUD 操作，rules 字段存储设备动作数组
 const { query } = require('../utils/db');
 
 const CREATE_TABLE = `

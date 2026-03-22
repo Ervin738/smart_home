@@ -1,16 +1,17 @@
+// MQTT 服务 - 连接 MQTT Broker，订阅设备状态上报并下发控制指令
 const mqtt = require('mqtt');
 const simulator = require('../simulation/deviceSimulator');
 const Device = require('../models/Device');
 const Log = require('../models/Log');
 
-const TOPIC_STATUS  = 'device/status';   // devices report state here
-const TOPIC_CONTROL = 'device/control';  // server sends commands here
+const TOPIC_STATUS  = 'device/status';   // 设备上报状态
+const TOPIC_CONTROL = 'device/control';  // 服务器下发控制指令
 
 let client = null;
 
 /**
- * Connect to the MQTT broker and subscribe to device status reports.
- * @param {object} io - Socket.IO instance (optional, for real-time push)
+ * 连接 MQTT Broker 并订阅设备状态上报
+ * @param {object} io - Socket.IO 实例（可选，用于实时推送）
  */
 function init(io = null) {
   const url = process.env.MQTT_URL;
@@ -46,22 +47,18 @@ function init(io = null) {
       return;
     }
 
-    // 1. Update simulator in-memory state
+    // 更新模拟器内存状态
     const updated = simulator.updateState(deviceId, newStatus);
     if (!updated) {
       console.warn(`[MQTT] Device ${deviceId} not found in simulator.`);
       return;
     }
-    if (updated._offline) {
-      console.warn(`[MQTT] Device ${deviceId} is offline, status report ignored.`);
-      return;
-    }
 
-    // 2. Log the action
+    // 记录操作日志
     await Log.create({ action: `mqtt_report:device_${deviceId}`, deviceId })
       .catch(err => console.error('[MQTT] Log error:', err.message));
 
-    // 3. Push to frontend via Socket.IO
+    // 通过 Socket.IO 推送给前端
     if (io) {
       io.emit('device:statusChanged', { deviceId, status: updated });
     }
@@ -75,7 +72,7 @@ function init(io = null) {
 }
 
 /**
- * Publish a control command to a device.
+ * 向设备下发控制指令
  * @param {number} deviceId
  * @param {object} action
  */
@@ -92,7 +89,7 @@ function publishControl(deviceId, action) {
 }
 
 /**
- * Publish a device status report (used by simulator to mimic real device behaviour).
+ * 上报设备状态（模拟器用于模拟真实设备行为）
  * @param {number} deviceId
  * @param {object} newStatus
  */
