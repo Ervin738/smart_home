@@ -23,7 +23,7 @@ const emit = defineEmits<{
 }>()
 
 const defaultModes: ModeOption[] = [
-  { label: '添加设备', to: '/equipment' },
+  { label: '设备管理', to: '/equipment' },
   { label: '标准模式', to: '/' },
   { label: '平面图模式', to: '/floor-plan' }
 ]
