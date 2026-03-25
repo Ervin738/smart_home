@@ -8,6 +8,7 @@ const TOPIC_STATUS  = 'device/status';   // 设备上报状态
 const TOPIC_CONTROL = 'device/control';  // 服务器下发控制指令
 
 let client = null;
+let clientId = null;
 
 /**
  * 连接 MQTT Broker 并订阅设备状态上报
@@ -20,7 +21,8 @@ function init(io = null) {
     return;
   }
 
-  client = mqtt.connect(url, { reconnectPeriod: 5000 });
+  clientId = `server-${Date.now()}`;
+  client = mqtt.connect(url, { reconnectPeriod: 30000, clientId });
 
   client.on('connect', () => {
     console.log(`[MQTT] Connected to broker: ${url}`);
@@ -41,7 +43,9 @@ function init(io = null) {
       return;
     }
 
-    const { deviceId, newStatus } = data;
+    const { deviceId, newStatus, _from } = data;
+    // 忽略自己发出的消息，避免回环
+    if (_from === clientId) return;
     if (!deviceId || !newStatus) {
       console.warn('[MQTT] Missing deviceId or newStatus in payload.');
       return;
@@ -95,7 +99,7 @@ function publishControl(deviceId, action) {
  */
 function publishStatus(deviceId, newStatus) {
   if (!client || !client.connected) return;
-  const payload = JSON.stringify({ deviceId, newStatus });
+  const payload = JSON.stringify({ deviceId, newStatus, _from: clientId });
   client.publish(TOPIC_STATUS, payload, { qos: 0 });
 }
 

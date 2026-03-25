@@ -9,6 +9,7 @@ const bodyParser = require('body-parser');
 const { pool }        = require('./utils/db');
 const socketService   = require('./utils/socketService');
 const mqttService     = require('./utils/mqttService');
+const { startBroker } = require('./utils/brokerService');
 const initDb          = require('./utils/initDb');
 const simulator       = require('./simulation/deviceSimulator');
 
@@ -31,6 +32,9 @@ app.use('/api/rooms',   require('./routes/roomRoutes'));
 
 // ── 启动流程 ──────────────────────────────────────────────────────────────────
 async function start() {
+  // 启动内置 MQTT Broker（如果端口未被占用）
+  await startBroker();
+
   // 验证数据库连接
   await pool.query('SELECT 1');
   console.log('[DB] Connection pool ready.');
@@ -42,14 +46,14 @@ async function start() {
   // 初始化数据库表
   await initDb();
 
+  // 初始化 MQTT（先连接，再启动模拟器，确保 client 已就绪）
+  mqttService.init(io);
+  app.set('mqttService', mqttService);
+
   // 加载并启动设备模拟器
   await simulator.load();
   simulator.start(io, mqttService);
   app.set('simulator', simulator);
-
-  // 初始化 MQTT
-  mqttService.init(io);
-  app.set('mqttService', mqttService);
 
   // 启动 HTTP 服务器
   const PORT = process.env.PORT || 3000;

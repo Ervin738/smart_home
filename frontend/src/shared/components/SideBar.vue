@@ -110,23 +110,6 @@ const deleteTab = () => {
         <span class="nav-icon">＋</span>
         <span v-if="!collapsed" class="nav-label">添加房间</span>
       </div>
-      <div class="divider"></div>
-    </div>
-
-    <!-- 主题切换 -->
-    <div class="section theme-section">
-      <div v-if="!collapsed" class="section-label">主题</div>
-      <div class="theme-dots">
-        <button
-          v-for="(theme, key) in themeStore.themes"
-          :key="key"
-          class="theme-dot"
-          :class="{ active: themeStore.currentThemeName === key }"
-          :title="theme.displayName"
-          @click="themeStore.setTheme(key)"
-          :style="{ background: `linear-gradient(135deg, ${theme.colors.gradientStops.slice(0,2).join(', ')})` }"
-        ></button>
-      </div>
     </div>
 
     <!-- 对话框 -->
@@ -308,40 +291,6 @@ const deleteTab = () => {
   background: v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.08)" : "rgba(59,130,246,0.12)"');
   margin: 8px 4px;
   flex-shrink: 0;
-}
-
-.theme-section {
-  margin-top: auto;
-  padding-top: 8px;
-  padding-bottom: 32px;
-  flex-shrink: 0;
-}
-
-.theme-dots {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 4px 8px;
-  justify-content: center;
-}
-
-.theme-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.theme-dot:hover {
-  transform: scale(1.15);
-}
-
-.theme-dot.active {
-  border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 /* 对话框样式 */

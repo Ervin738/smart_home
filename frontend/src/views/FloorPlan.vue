@@ -472,8 +472,8 @@ function onRoomContextMenu(e: MouseEvent, roomId: number) {
         <button v-else class="edit-btn" @click="handleEdit">
           编辑布局
         </button>
-        <!-- 一键全开 -->
-        <button class="allon-btn" @click="handleAllOn">⚡ 一键全开</button>
+        <!-- 回家模式 -->
+        <button class="allon-btn" @click="handleAllOn">🏠 回家模式</button>
         <!-- 离家模式 -->
         <button class="leave-btn" @click="handleLeave">🚪 离家模式</button>
       </div>

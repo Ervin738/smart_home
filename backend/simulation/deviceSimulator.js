@@ -83,12 +83,7 @@ class DeviceSimulator {
           status:   device.status,
         }).catch(err => console.error('[Simulator] DB update error:', err));
 
-        // 1. 仿真器通过 MQTT 上报状态（模拟真实设备行为）
-        if (this._mqtt) {
-          this._mqtt.publishStatus(device.id, device.status);
-        }
-
-        // 2. 直接推 Socket.IO（MQTT 回环有延迟时的备用）
+        // 直接推 Socket.IO 给前端
         if (this._io) {
           this._io.emit('device:statusChanged', {
             deviceId: device.id,

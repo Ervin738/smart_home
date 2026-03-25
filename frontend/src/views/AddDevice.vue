@@ -272,7 +272,7 @@ const confirmRename = async (device: Device) => {
       </div>
       
       <div class="add-button" @click="openAddForm">
-        <span class="add-text">{{ showForm ? '取消' : '+ 设备管理' }}</span>
+        <span class="add-text">{{ showForm ? '取消' : '+ 添加设备' }}</span>
       </div>
     </div>
 

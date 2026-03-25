@@ -31,6 +31,20 @@ useBackendSync()
         <div class="top-section">
           <Clock />
           <Weather />
+          <div class="theme-switcher">
+            <span class="theme-label">主题</span>
+            <div class="theme-dots">
+              <button
+                v-for="(theme, key) in themeStore.themes"
+                :key="key"
+                class="theme-dot"
+                :class="{ active: themeStore.currentThemeName === key }"
+                :title="theme.displayName"
+                @click="themeStore.setTheme(key)"
+                :style="{ background: `linear-gradient(135deg, ${theme.colors.gradientStops.slice(0,2).join(', ')})` }"
+              ></button>
+            </div>
+          </div>
         </div>
         <div class="middle-section">
           <router-view />
@@ -100,6 +114,53 @@ useBackendSync()
   align-items: flex-end;
   gap: 20px;
   flex-shrink: 0;
+  justify-content: space-between;
+}
+
+.theme-switcher {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin-left: auto;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid v-bind('themeStore.currentTheme?.isDark ? "rgba(255,255,255,0.15)" : "rgba(59,130,246,0.25)"');
+  background: v-bind('themeStore.currentTheme?.isDark ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.2)"');
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.theme-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: v-bind('themeStore.textColorSecondary');
+  letter-spacing: 0.05em;
+}
+
+.theme-dots {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.theme-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.theme-dot:hover {
+  transform: scale(1.15);
+}
+
+.theme-dot.active {
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
 }
 
 .layout-classic {
