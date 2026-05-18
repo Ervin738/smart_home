@@ -1,4 +1,4 @@
-# 🏠 智能家居控制台
+# 智能家居控制台
 
 **全栈智能家居可视化控制系统**
 
@@ -13,18 +13,18 @@
 
 ---
 
-## 📖 目录
+## 目录
 
-- [项目介绍](#-项目介绍)
-- [系统架构](#-系统架构)
-- [功能概览](#-功能概览)
-- [前端介绍](#-前端介绍)
-- [后端介绍](#-后端介绍)
-- [快速开始](#-快速开始)
+- [项目介绍](#项目介绍)
+- [系统架构](#系统架构)
+- [功能概览](#功能概览)
+- [前端介绍](#前端介绍)
+- [后端介绍](#后端介绍)
+- [快速开始](#快速开始)
 
 ---
 
-## 🌟 项目介绍
+## 项目介绍
 
 智能家居控制台是一套完整的全栈物联网控制系统，旨在为家庭用户提供统一的智能设备管理平台。
 
@@ -34,19 +34,19 @@
 
 | 亮点 | 说明 |
 |------|------|
-| 🏘️ 多房间管理 | 按房间分组展示设备，标签页快速切换，支持动态添加房间 |
-| 📱 40+ 设备类型 | 覆盖灯光、空调、厨房、卫浴、清洁、娱乐、安防、网络等全品类 |
-| ⚡ 双层控制 | 底部快捷操作栏满足日常需求，详细弹窗提供精细控制 |
-| 🎬 场景自动化 | 自定义场景规则，一键触发多设备联动 |
-| 🗺️ 平面图视图 | 可视化房间平面图，直观展示设备位置与状态 |
-| 🔄 实时同步 | Socket.IO 双向通信，设备状态毫秒级推送至所有客户端 |
-| 🤖 设备模拟 | 内置状态机模拟器，开发调试无需真实硬件 |
-| 🌐 MQTT 支持 | 标准物联网协议，可直接接入真实设备 |
-| 🌙 主题切换 | 深色 / 浅色主题，星空粒子背景动效 |
+|  多房间管理 | 按房间分组展示设备，标签页快速切换，支持动态添加房间 |
+|  40+ 设备类型 | 覆盖灯光、空调、厨房、卫浴、清洁、娱乐、安防、网络等全品类 |
+|  双层控制 | 底部快捷操作栏满足日常需求，详细弹窗提供精细控制 |
+|  场景自动化 | 自定义场景规则，一键触发多设备联动 |
+|  平面图视图 | 可视化房间平面图，直观展示设备位置与状态 |
+|  实时同步 | Socket.IO 双向通信，设备状态毫秒级推送至所有客户端 |
+|  设备模拟 | 内置状态机模拟器，开发调试无需真实硬件 |
+|  MQTT 支持 | 标准物联网协议，可直接接入真实设备 |
+|  主题切换 | 深色 / 浅色主题，星空粒子背景动效 |
 
 ---
 
-## 🏗️ 系统架构
+## 系统架构
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -76,21 +76,21 @@
 
 ---
 
-## ✨ 功能概览
+## 功能概览
 
 ### 设备分类
 
 | 分类 | 设备类型 |
 |------|------|
-| 💡 灯光 | 普通灯、氛围灯、台灯、夜灯等 |
-| 🌡️ 环境 | 空调、空气净化器、加湿器、除湿机、风扇、暖风机、香薰机 |
-| 🍳 厨房 | 电饭锅、油烟机、空气炸锅、电热水壶、电磁炉 |
-| 🚿 卫浴 | 智能马桶、热水器、浴霸 |
-| 🧹 清洁 | 洗衣机、烘干机、扫地机器人、晾衣架 |
-| 🎮 娱乐 | 电视、音响、投影仪、智能时钟 |
-| 🔒 安防 | 摄像头、门锁、传感器 |
-| 🌐 网络 | 路由器、网关 |
-| 🔌 开关 | 智能插座、开关面板 |
+|  灯光 | 普通灯、氛围灯、台灯、夜灯等 |
+|  环境 | 空调、空气净化器、加湿器、除湿机、风扇、暖风机、香薰机 |
+|  厨房 | 电饭锅、油烟机、空气炸锅、电热水壶、电磁炉 |
+|  卫浴 | 智能马桶、热水器、浴霸 |
+|  清洁 | 洗衣机、烘干机、扫地机器人、晾衣架 |
+|  娱乐 | 电视、音响、投影仪、智能时钟 |
+|  安防 | 摄像头、门锁、传感器 |
+|  网络 | 路由器、网关 |
+|  开关 | 智能插座、开关面板 |
 
 ### 场景自动化
 
@@ -98,7 +98,7 @@
 
 ---
 
-## 🖥️ 前端介绍
+## 前端介绍
 
 ### 技术栈
 
@@ -119,48 +119,48 @@ Vue 3 (Composition API)
 
 ```
 src/
-├── 📄 App.vue                    根组件（顶栏、路由视图）
-├── 📄 main.ts                    应用入口
+├──  App.vue                    根组件（顶栏、路由视图）
+├──  main.ts                    应用入口
 │
-├── 📂 features/
-│   ├── 📂 device/                设备功能模块
-│   │   ├── 📂 components/        设备组件（按分类组织）
-│   │   │   ├── 🚿 bathroom/      卫浴（马桶、热水器、浴霸）
-│   │   │   ├── 🧹 cleaners/      清洁（洗衣机、烘干机、扫地机）
-│   │   │   ├── 🎮 entertainment/ 娱乐（电视、音响、投影仪）
-│   │   │   ├── 🌡️ environment/   环境（空调、净化器、风扇、加湿器等）
-│   │   │   ├── 🍳 kitchen/       厨房（电饭锅、油烟机、空气炸锅）
-│   │   │   ├── 💡 lights/        灯光
-│   │   │   ├── 🌐 network/       网络设备
-│   │   │   ├── 👤 personal/      个人设备
-│   │   │   ├── 🔒 security/      安防
-│   │   │   ├── 🔌 switches/      开关插座
-│   │   │   └── 🔧 common/        通用组件（定时器、电量详情）
-│   │   ├── 📂 composables/       设备控制逻辑复用
-│   │   ├── 📂 store/             设备 Pinia Store
-│   │   └── 📂 types/             TypeScript 类型定义
-│   └── 📂 layout/                布局模块（导航栏、标签页）
+├──  features/
+│   ├──  device/                设备功能模块
+│   │   ├──  components/        设备组件（按分类组织）
+│   │   │   ├──  bathroom/      卫浴（马桶、热水器、浴霸）
+│   │   │   ├──  cleaners/      清洁（洗衣机、烘干机、扫地机）
+│   │   │   ├──  entertainment/ 娱乐（电视、音响、投影仪）
+│   │   │   ├──  environment/   环境（空调、净化器、风扇、加湿器等）
+│   │   │   ├──  kitchen/       厨房（电饭锅、油烟机、空气炸锅）
+│   │   │   ├──  lights/        灯光
+│   │   │   ├──  network/       网络设备
+│   │   │   ├──  personal/      个人设备
+│   │   │   ├──  security/      安防
+│   │   │   ├──  switches/      开关插座
+│   │   │   └──  common/        通用组件（定时器、电量详情）
+│   │   ├──  composables/       设备控制逻辑复用
+│   │   ├──  store/             设备 Pinia Store
+│   │   └──  types/             TypeScript 类型定义
+│   └──  layout/                布局模块（导航栏、标签页）
 │
-├── 📂 views/
-│   ├── 📄 StandardMode.vue       主控制页面
-│   ├── 📄 FloorPlan.vue          平面图视图
-│   └── 📄 AddDevice.vue          添加设备页面
+├──  views/
+│   ├──  StandardMode.vue       主控制页面
+│   ├──  FloorPlan.vue          平面图视图
+│   └──  AddDevice.vue          添加设备页面
 │
-├── 📂 services/
-│   ├── 📄 api.ts                 REST API 封装
-│   └── 📄 socket.ts              Socket.IO 连接管理
+├──  services/
+│   ├──  api.ts                 REST API 封装
+│   └──  socket.ts              Socket.IO 连接管理
 │
-├── 📂 composables/
-│   └── 📄 useBackendSync.ts      后端数据同步逻辑
+├──  composables/
+│   └──  useBackendSync.ts      后端数据同步逻辑
 │
-├── 📂 stores/
-│   ├── 📄 theme.ts               主题 Store
-│   └── 📄 layout.ts              布局 Store
+├──  stores/
+│   ├──  theme.ts               主题 Store
+│   └──  layout.ts              布局 Store
 │
-├── 📂 shared/                    公共组件（时钟、天气、导航）
-├── 📂 constants/                 设备类型、配置常量
-├── 📂 router/                    路由配置
-└── 📂 plugins/                   插件（Element Plus 等）
+├──  shared/                    公共组件（时钟、天气、导航）
+├──  constants/                 设备类型、配置常量
+├──  router/                    路由配置
+└──  plugins/                   插件（Element Plus 等）
 ```
 
 ### 与后端通信
@@ -185,7 +185,7 @@ src/
 
 ---
 
-## ⚙️ 后端介绍
+## 后端介绍
 
 ### 技术栈
 
@@ -204,32 +204,32 @@ Node.js 20+
 
 ```
 backend/
-├── 📄 app.js                     应用入口，启动序列
-├── 📂 controllers/               请求处理逻辑
-│   ├── 📄 deviceController.js
-│   ├── 📄 deviceStateController.js
-│   ├── 📄 roomController.js
-│   └── 📄 sceneController.js
-├── 📂 models/                    数据模型（MySQL 操作封装）
-│   ├── 📄 Device.js
-│   ├── 📄 DeviceState.js
-│   ├── 📄 Room.js
-│   ├── 📄 Scene.js
-│   └── 📄 Log.js
-├── 📂 routes/                    路由定义
-│   ├── 📄 deviceRoutes.js
-│   ├── 📄 deviceStateRoutes.js
-│   ├── 📄 roomRoutes.js
-│   └── 📄 sceneRoutes.js
-├── 📂 simulation/                设备模拟
-│   ├── 📄 deviceSimulator.js     设备状态机
-│   └── 📄 simulationService.js   场景规则执行
-├── 📂 utils/
-│   ├── 📄 db.js                  MySQL 连接池
-│   ├── 📄 initDb.js              数据库初始化
-│   ├── 📄 mqttService.js         MQTT 客户端
-│   └── 📄 socketService.js       Socket.IO 服务
-└── 📄 .env                       环境变量配置
+├──  app.js                     应用入口，启动序列
+├──  controllers/               请求处理逻辑
+│   ├──  deviceController.js
+│   ├──  deviceStateController.js
+│   ├──  roomController.js
+│   └──  sceneController.js
+├──  models/                    数据模型（MySQL 操作封装）
+│   ├──  Device.js
+│   ├──  DeviceState.js
+│   ├──  Room.js
+│   ├──  Scene.js
+│   └──  Log.js
+├──  routes/                    路由定义
+│   ├──  deviceRoutes.js
+│   ├──  deviceStateRoutes.js
+│   ├──  roomRoutes.js
+│   └──  sceneRoutes.js
+├──  simulation/                设备模拟
+│   ├──  deviceSimulator.js     设备状态机
+│   └──  simulationService.js   场景规则执行
+├──  utils/
+│   ├──  db.js                  MySQL 连接池
+│   ├──  initDb.js              数据库初始化
+│   ├──  mqttService.js         MQTT 客户端
+│   └──  socketService.js       Socket.IO 服务
+└──  .env                       环境变量配置
 ```
 
 ### API 接口
@@ -303,7 +303,7 @@ GET /health  →  { "status": "ok" }
 
 ---
 
-## 🚀 快速开始
+## 快速开始
 
 ### 环境要求
 
