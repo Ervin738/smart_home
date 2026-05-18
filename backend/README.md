@@ -1,4 +1,4 @@
-# ⚙️ 智能家居控制台 · 后端
+# 智能家居控制台 · 后端
 
 **基于 Node.js + Express 构建的 RESTful API 服务**
 
@@ -10,21 +10,21 @@
 
 ---
 
-## ✨ 功能特性
+##  功能特性
 
 | 功能 | 描述 |
 |------|------|
-| 🔌 RESTful API | 设备、房间、场景的完整 CRUD |
-| 📡 实时推送 | Socket.IO 广播设备状态变更至所有客户端 |
-| 🌐 MQTT 集成 | 订阅设备上报，下发控制指令 |
-| 🤖 设备模拟器 | 无需真实硬件即可模拟设备状态变化 |
-| 🎬 场景自动化 | 批量触发多设备联动规则 |
-| 📋 操作日志 | 记录所有设备控制动作 |
-| 🗄️ 自动建表 | 启动时自动初始化 MySQL 数据库表结构 |
+|  RESTful API | 设备、房间、场景的完整 CRUD |
+|  实时推送 | Socket.IO 广播设备状态变更至所有客户端 |
+|  MQTT 集成 | 订阅设备上报，下发控制指令 |
+|  设备模拟器 | 无需真实硬件即可模拟设备状态变化 |
+|  场景自动化 | 批量触发多设备联动规则 |
+|  操作日志 | 记录所有设备控制动作 |
+|  自动建表 | 启动时自动初始化 MySQL 数据库表结构 |
 
 ---
 
-## 🛠️ 技术栈
+##  技术栈
 
 ```
 Node.js 20+
@@ -39,47 +39,47 @@ Node.js 20+
 
 ---
 
-## 📁 项目结构
+##  项目结构
 
 ```
 backend/
-├── 📄 app.js                     应用入口，启动序列
+├──  app.js                     应用入口，启动序列
 │
-├── 📂 controllers/               请求处理逻辑
-│   ├── 📄 deviceController.js
-│   ├── 📄 deviceStateController.js
-│   ├── 📄 roomController.js
-│   └── 📄 sceneController.js
+├──  controllers/               请求处理逻辑
+│   ├──  deviceController.js
+│   ├──  deviceStateController.js
+│   ├──  roomController.js
+│   └──  sceneController.js
 │
-├── 📂 models/                    数据模型（MySQL 操作封装）
-│   ├── 📄 Device.js
-│   ├── 📄 DeviceState.js
-│   ├── 📄 Room.js
-│   ├── 📄 Scene.js
-│   └── 📄 Log.js
+├──  models/                    数据模型（MySQL 操作封装）
+│   ├──  Device.js
+│   ├──  DeviceState.js
+│   ├──  Room.js
+│   ├──  Scene.js
+│   └──  Log.js
 │
-├── 📂 routes/                    路由定义
-│   ├── 📄 deviceRoutes.js
-│   ├── 📄 deviceStateRoutes.js
-│   ├── 📄 roomRoutes.js
-│   └── 📄 sceneRoutes.js
+├──  routes/                    路由定义
+│   ├──  deviceRoutes.js
+│   ├──  deviceStateRoutes.js
+│   ├──  roomRoutes.js
+│   └──  sceneRoutes.js
 │
-├── 📂 simulation/                设备模拟
-│   ├── 📄 deviceSimulator.js     设备状态机
-│   └── 📄 simulationService.js   场景规则执行
+├──  simulation/                设备模拟
+│   ├──  deviceSimulator.js     设备状态机
+│   └──  simulationService.js   场景规则执行
 │
-├── 📂 utils/
-│   ├── 📄 db.js                  MySQL 连接池
-│   ├── 📄 initDb.js              数据库初始化
-│   ├── 📄 mqttService.js         MQTT 客户端
-│   └── 📄 socketService.js       Socket.IO 服务
+├──  utils/
+│   ├──  db.js                  MySQL 连接池
+│   ├──  initDb.js              数据库初始化
+│   ├──  mqttService.js         MQTT 客户端
+│   └──  socketService.js       Socket.IO 服务
 │
-└── 📄 .env                       环境变量配置
+└──  .env                       环境变量配置
 ```
 
 ---
 
-## 📡 API 接口
+##  API 接口
 
 ### 设备 `/api/devices`
 
@@ -116,7 +116,7 @@ GET /health  →  { "status": "ok" }
 
 ---
 
-## 🗄️ 数据模型
+##  数据模型
 
 ### devices — 设备主表
 
@@ -143,7 +143,7 @@ GET /health  →  { "status": "ok" }
 
 ---
 
-## 🚀 快速开始
+##  快速开始
 
 ### 环境要求
 
@@ -165,7 +165,7 @@ npm start
 
 服务运行在 `http://localhost:3000`
 
-> 💡 首次启动会自动创建所有数据库表，无需手动建表。
+>  首次启动会自动创建所有数据库表，无需手动建表。
 
 ### 环境配置
 
@@ -186,13 +186,13 @@ MQTT_URL=mqtt://user:password@host:1883
 
 ---
 
-## 📨 Socket.IO 事件
+##  Socket.IO 事件
 
 | 事件 | 方向 | 说明 |
 |------|------|------|
 | `device:statusChanged` | 服务端 → 客户端 | 设备状态变更推送 |
 
-## 📬 MQTT 主题
+##  MQTT 主题
 
 | 主题 | 方向 | 说明 |
 |------|------|------|
